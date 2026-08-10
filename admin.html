@@ -1,4 +1,4 @@
-<!-- fix 41 -->
+<!-- fix 44 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -43,11 +43,20 @@
   .section-sub{color:#a8b5ba; font-size:13.5px; margin:0 0 20px;}
 
   .vve-card{
-    background:var(--paper); border-radius:4px; padding:20px 22px; margin-bottom:16px;
-    box-shadow:0 1px 0 var(--rule-soft), 0 10px 24px -16px #00000080;
+    background:var(--paper); border-radius:4px; padding:0; margin-bottom:16px;
+    box-shadow:0 1px 0 var(--rule-soft), 0 10px 24px -16px #00000080; overflow:hidden;
   }
   .vve-card.pending{border:2px solid var(--amber);}
-  .vve-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px 14px; margin-bottom:14px;}
+  .vve-head{
+    display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px 14px;
+    padding:20px 22px; cursor:pointer; user-select:none;
+  }
+  .vve-head .chevron{
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-fade); transition:transform .2s ease; flex-shrink:0;
+  }
+  .vve-card.open .vve-head .chevron{transform:rotate(90deg);}
+  .vve-body{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+  .vve-body-inner{padding:0 22px 20px;}
   .vve-name{font-family:'Fraunces',serif; font-size:17px; font-weight:600;}
   .vve-email{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-fade); margin-right:auto;}
   .status-badge{
@@ -62,6 +71,17 @@
   }
   .delete-btn:hover{background:var(--debit); color:#fff;}
   .approve-btn{font-size:13px; padding:9px 16px;}
+
+  .stats-card{
+    background:var(--paper); border-radius:4px; padding:20px 22px; margin-bottom:16px;
+    box-shadow:0 1px 0 var(--rule-soft), 0 10px 24px -16px #00000080;
+  }
+  .stats-row{display:flex; align-items:center; gap:12px; padding:7px 0; border-bottom:1px dotted var(--rule-soft);}
+  .stats-row:last-child{border-bottom:none;}
+  .stats-label{flex:0 0 260px; font-size:12.5px; color:var(--ink-text);}
+  .stats-bar-track{flex:1; height:10px; background:#00000010; border-radius:5px; overflow:hidden;}
+  .stats-bar-fill{height:100%; background:var(--slate,#3d5a6b); border-radius:5px;}
+  .stats-count{flex:0 0 30px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-fade);}
 
   .module-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:8px; margin-bottom:14px;}
   .module-toggle{
@@ -104,6 +124,10 @@
     <span id="tikkieSaveMsg" style="margin-left:10px; font-size:12.5px; color:var(--credit); display:none;">&#10003; Opgeslagen</span>
   </div>
 
+  <h2>Modulegebruik</h2>
+  <p class="section-sub">Aantal goedgekeurde VvE's met toegang per module. Geen namen, alleen totalen.</p>
+  <div class="stats-card"><div id="statsList"><div class="empty">Bezig met laden...</div></div></div>
+
   <h2>Wachtend op goedkeuring</h2>
   <p class="section-sub">Nieuwe registraties. Ken modules toe om ze goed te keuren — de VvE krijgt dan een bevestigingsmail.</p>
   <div id="pendingList"><div class="empty">Bezig met laden...</div></div>
@@ -114,8 +138,8 @@
 </main>
 
 <script type="module">
-  import { auth, watchAuth, adminSignInWithGoogle, getAllVves, approveVve, setModuleAccess, sendModulesUpdatedEmail, deleteVve, getTikkieConfig, setTikkieConfig, logout } from './assets/vve-auth.js?v41';
-  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v41';
+  import { auth, watchAuth, adminSignInWithGoogle, getAllVves, approveVve, setModuleAccess, sendModulesUpdatedEmail, deleteVve, getTikkieConfig, setTikkieConfig, logout } from './assets/vve-auth.js?v44';
+  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v44';
 
   const loginWrap = document.getElementById('loginWrap');
   const main = document.getElementById('main');
@@ -128,6 +152,28 @@
   });
   const pendingList = document.getElementById('pendingList');
   const approvedList = document.getElementById('approvedList');
+  const statsList = document.getElementById('statsList');
+
+  var openCard = null; // het momenteel opengeklapte .vve-card element
+  function makeCollapsible(card, head, body){
+    body.style.maxHeight = '0px';
+    head.addEventListener('click', function(){
+      var isOpen = card.classList.contains('open');
+      if (openCard && openCard !== card) {
+        openCard.classList.remove('open');
+        openCard.querySelector('.vve-body').style.maxHeight = '0px';
+      }
+      if (isOpen) {
+        card.classList.remove('open');
+        body.style.maxHeight = '0px';
+        openCard = null;
+      } else {
+        card.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 40 + 'px';
+        openCard = card;
+      }
+    });
+  }
 
   googleLoginBtn.addEventListener('click', async function(){
     loginError.classList.remove('show');
@@ -143,7 +189,8 @@
   });
 
   function attachDelete(card, vve){
-    card.querySelector('.delete-btn').addEventListener('click', async function(){
+    card.querySelector('.delete-btn').addEventListener('click', async function(e){
+      e.stopPropagation();
       var confirmed = window.confirm(
         'Weet je zeker dat je de registratie van ' + (vve.naam || vve.email) + ' (' + vve.email + ') wilt verwijderen?'
       );
@@ -164,11 +211,19 @@
     var head = document.createElement('div');
     head.className = 'vve-head';
     head.innerHTML =
+      '<span class="chevron">\u25b8</span>' +
       '<span class="vve-name">' + (vve.naam || '(naam onbekend)') + '</span>' +
       '<span class="vve-email">' + vve.email + '</span>' +
       '<span class="status-badge pending">Wachtend</span>' +
       '<button type="button" class="delete-btn">Verwijderen</button>';
     card.appendChild(head);
+
+    var body = document.createElement('div');
+    body.className = 'vve-body';
+    var bodyInner = document.createElement('div');
+    bodyInner.className = 'vve-body-inner';
+    body.appendChild(bodyInner);
+    card.appendChild(body);
 
     var grid = document.createElement('div');
     grid.className = 'module-grid';
@@ -182,7 +237,7 @@
       label.appendChild(document.createTextNode(mod.title));
       grid.appendChild(label);
     });
-    card.appendChild(grid);
+    bodyInner.appendChild(grid);
 
     var approveBtn = document.createElement('button');
     approveBtn.type = 'button';
@@ -203,8 +258,9 @@
         approveBtn.textContent = '\u2713 Goedkeuren met gekozen modules';
       }
     });
-    card.appendChild(approveBtn);
+    bodyInner.appendChild(approveBtn);
 
+    makeCollapsible(card, head, body);
     attachDelete(card, vve);
     return card;
   }
@@ -216,11 +272,19 @@
     var head = document.createElement('div');
     head.className = 'vve-head';
     head.innerHTML =
+      '<span class="chevron">\u25b8</span>' +
       '<span class="vve-name">' + (vve.naam || '(naam onbekend)') + '</span>' +
       '<span class="vve-email">' + vve.email + '</span>' +
       '<span class="status-badge approved">Goedgekeurd</span>' +
       '<button type="button" class="delete-btn">Verwijderen</button>';
     card.appendChild(head);
+
+    var body = document.createElement('div');
+    body.className = 'vve-body';
+    var bodyInner = document.createElement('div');
+    bodyInner.className = 'vve-body-inner';
+    body.appendChild(bodyInner);
+    card.appendChild(body);
 
     var grid = document.createElement('div');
     grid.className = 'module-grid';
@@ -240,6 +304,9 @@
         hasPendingChange = false;
         beforeSnapshot = null;
         notifyBtn.style.display = 'none';
+        if (card.classList.contains('open')) {
+          body.style.maxHeight = body.scrollHeight + 40 + 'px';
+        }
       } catch (err) {
         alert('Versturen mislukt: ' + (err && err.message ? err.message : err));
       } finally {
@@ -270,6 +337,9 @@
           // bewuste klik op 'Wijzigingen doorgeven' hieronder.
           hasPendingChange = true;
           notifyBtn.style.display = 'inline-block';
+          if (card.classList.contains('open')) {
+            body.style.maxHeight = body.scrollHeight + 40 + 'px';
+          }
         } catch (err) {
           alert('Opslaan mislukt: ' + (err && err.message ? err.message : err));
           checkbox.checked = !checkbox.checked;
@@ -281,9 +351,10 @@
       label.appendChild(document.createTextNode(mod.title));
       grid.appendChild(label);
     });
-    card.appendChild(grid);
-    card.appendChild(notifyBtn);
+    bodyInner.appendChild(grid);
+    bodyInner.appendChild(notifyBtn);
 
+    makeCollapsible(card, head, body);
     attachDelete(card, vve);
     return card;
   }
@@ -306,6 +377,33 @@
     } else {
       approved.forEach(function(vve){ approvedList.appendChild(renderApprovedCard(vve)); });
     }
+
+    renderStats(approved);
+  }
+
+  function renderStats(approved){
+    var counts = ALL_MODULES.map(function(mod){
+      var n = approved.filter(function(vve){
+        return vve.moduleAccess && vve.moduleAccess[mod.slug] === true;
+      }).length;
+      return { title: mod.title, count: n };
+    });
+    var max = Math.max(1, ...counts.map(function(c){ return c.count; }));
+
+    statsList.innerHTML = '';
+    if (approved.length === 0) {
+      statsList.innerHTML = '<div class="empty">Nog geen data \u2014 wacht op de eerste goedkeuring.</div>';
+      return;
+    }
+    counts.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'stats-row';
+      row.innerHTML =
+        '<span class="stats-label">' + c.title + '</span>' +
+        '<span class="stats-bar-track"><span class="stats-bar-fill" style="width:' + (c.count / max * 100) + '%;"></span></span>' +
+        '<span class="stats-count">' + c.count + '</span>';
+      statsList.appendChild(row);
+    });
   }
 
   async function initTikkieForm(){

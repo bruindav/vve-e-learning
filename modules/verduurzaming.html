@@ -1,11 +1,11 @@
-<!-- fix 30 -->
+<!-- fix 45 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
 <script>document.documentElement.style.visibility='hidden';</script>
 <script type="module">
-  import { guardModule } from '../assets/module-gate.js?v41';
+  import { guardModule } from '../assets/module-gate.js?v45';
   guardModule('verduurzaming');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -435,6 +435,7 @@
       document.getElementById('doneScore').textContent = answeredCount + '/5';
       document.getElementById('doneBanner').classList.add('show');
       try{ var _uidKey = (window.__vveUid || 'anon'); localStorage.setItem('vveModuleDone:'+_uidKey+':verduurzaming','1'); }catch(e){}
+      if (window.__markModuleCompleted) { window.__markModuleCompleted(); }
     }
   }
 

@@ -22,7 +22,11 @@ service cloud.firestore {
                     && request.resource.data.moduleAccess == {};
 
       // Alleen de beheerder mag goedkeuren, modules toewijzen, of iets anders wijzigen.
-      allow update: if isAdmin();
+      // Uitzondering: een VvE mag het eigen 'progress'-veld (gestart/afgerond per module)
+      // bijwerken, om gebruiksstatistieken mogelijk te maken — nooit status of moduleAccess.
+      allow update: if isAdmin()
+                    || (isSignedIn() && request.auth.uid == uid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress']));
 
       // Alleen de beheerder mag een registratie verwijderen.
       allow delete: if isAdmin();

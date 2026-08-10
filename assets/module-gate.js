@@ -1,5 +1,5 @@
-// fix 30
-import { watchAuth, hasModuleAccess, getVveDocForCurrentUser } from "./vve-auth.js?v41";
+// fix 45
+import { watchAuth, hasModuleAccess, getVveDocForCurrentUser, markModuleStarted, markModuleCompleted } from "./vve-auth.js?v45";
 
 function showScreen(opts) {
   document.documentElement.style.visibility = "";
@@ -77,6 +77,8 @@ export function guardModule(slug) {
       if (ok) {
         window.__vveUid = user.uid;
         document.documentElement.style.visibility = "";
+        markModuleStarted(slug);
+        window.__markModuleCompleted = function () { markModuleCompleted(slug); };
       } else {
         showDenied();
       }

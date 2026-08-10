@@ -1,4 +1,4 @@
-// fix 41
+// fix 45
 // Gedeelde Firebase Authentication + Firestore helpers.
 // Patroon: registratie met e-mail/wachtwoord -> pending-status -> admin keurt goed en
 // wijst modules toe -> bevestigingsmail bij registratie én bij goedkeuring (via EmailJS).
@@ -32,7 +32,7 @@ import {
   EMAILJS_TEMPLATE_ID,
   ALL_MODULES,
   ADMIN_EMAIL,
-} from "./firebase-config.js?v41";
+} from "./firebase-config.js?v45";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -129,6 +129,33 @@ export async function approveVve(vveDocId, email, naam, moduleAccess) {
 export async function setModuleAccess(vveDocId, slug, enabled) {
   const ref = doc(db, "vves", vveDocId);
   await updateDoc(ref, { [`moduleAccess.${slug}`]: enabled });
+}
+
+// ======================= Gebruiksstatistiek (gestart / afgerond) =======================
+// Alleen de eigen VvE mag dit bijwerken (zie firestore.rules), en alleen het 'progress'-veld —
+// nooit status of moduleAccess. Fouten hier mogen de rest van de pagina nooit blokkeren,
+// vandaar de stille try/catch.
+
+export async function markModuleStarted(slug) {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    const ref = doc(db, "vves", user.uid);
+    await updateDoc(ref, { [`progress.${slug}.started`]: true });
+  } catch (e) {
+    console.warn("[vve-auth] markModuleStarted mislukt:", e);
+  }
+}
+
+export async function markModuleCompleted(slug) {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    const ref = doc(db, "vves", user.uid);
+    await updateDoc(ref, { [`progress.${slug}.completed`]: true });
+  } catch (e) {
+    console.warn("[vve-auth] markModuleCompleted mislukt:", e);
+  }
 }
 
 export async function deleteVve(vveDocId) {

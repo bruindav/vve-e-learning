@@ -1,4 +1,4 @@
-// fix 41
+// fix 45
 // VUL HIERONDER JE EIGEN FIREBASE-CONFIGURATIE IN
 // (Firebase Console > Projectinstellingen > Jouw apps > Web app > SDK setup and configuration)
 export const firebaseConfig = {

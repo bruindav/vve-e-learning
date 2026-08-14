@@ -1,4 +1,4 @@
-// fix 45
+// fix 46
 // Gedeelde Firebase Authentication + Firestore helpers.
 // Patroon: registratie met e-mail/wachtwoord -> pending-status -> admin keurt goed en
 // wijst modules toe -> bevestigingsmail bij registratie én bij goedkeuring (via EmailJS).
@@ -32,7 +32,7 @@ import {
   EMAILJS_TEMPLATE_ID,
   ALL_MODULES,
   ADMIN_EMAIL,
-} from "./firebase-config.js?v45";
+} from "./firebase-config.js?v46";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -51,7 +51,6 @@ export async function registerVve(email, password, naam) {
     email: cleanEmail,
     naam: naam || "",
     status: "pending",
-    moduleAccess: {},
     createdAt: serverTimestamp(),
   });
   await sendRegistrationEmail(cleanEmail, naam);
@@ -79,14 +78,22 @@ export async function getVveDocForCurrentUser() {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
+export async function getGroupForCurrentUser() {
+  const vve = await getVveDocForCurrentUser();
+  if (!vve || !vve.groupId) return null;
+  const ref = doc(db, "vveGroups", vve.groupId);
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
 export async function hasModuleAccess(slug) {
   const vve = await getVveDocForCurrentUser();
-  return !!(
-    vve &&
-    vve.status === "approved" &&
-    vve.moduleAccess &&
-    vve.moduleAccess[slug] === true
-  );
+  if (!vve || vve.status !== "approved" || !vve.groupId) return false;
+  const groupRef = doc(db, "vveGroups", vve.groupId);
+  const groupSnap = await getDoc(groupRef);
+  if (!groupSnap.exists()) return false;
+  const group = groupSnap.data();
+  return !!(group.moduleAccess && group.moduleAccess[slug] === true);
 }
 
 export function logout() {
@@ -112,23 +119,93 @@ export async function getAllVves() {
   return out;
 }
 
+export async function getAllGroups() {
+  const snap = await getDocs(collection(db, "vveGroups"));
+  const out = [];
+  snap.forEach((d) => out.push({ id: d.id, ...d.data() }));
+  out.sort((a, b) => (a.naam || "").localeCompare(b.naam || ""));
+  return out;
+}
+
+export function suggestGroupCode(naam) {
+  const base = (naam || "VVE")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 10) || "VVE";
+  const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
+  return base + "-" + suffix;
+}
+
 /**
- * Keurt een VvE goed: zet status op 'approved', kent de gekozen modules toe,
- * en verstuurt de goedkeuringsmail.
+ * Keurt een NIEUWE registratie goed door er een NIEUWE VvE-groep voor aan te maken,
+ * met de gekozen modules. Verstuurt de goedkeuringsmail.
  */
-export async function approveVve(vveDocId, email, naam, moduleAccess) {
-  const ref = doc(db, "vves", vveDocId);
-  await updateDoc(ref, {
+export async function approveVveNewGroup(vveDocId, email, naam, groupNaam, groupCode, moduleAccess) {
+  const groupRef = doc(collection(db, "vveGroups"));
+  await setDoc(groupRef, {
+    naam: groupNaam || naam || "",
+    code: groupCode || suggestGroupCode(groupNaam || naam),
+    moduleAccess: moduleAccess || {},
+    createdAt: serverTimestamp(),
+  });
+  const vveRef = doc(db, "vves", vveDocId);
+  await updateDoc(vveRef, {
     status: "approved",
-    moduleAccess,
+    groupId: groupRef.id,
+    approvedAt: serverTimestamp(),
+  });
+  await sendApprovalEmail(email, naam, moduleAccess || {});
+  return groupRef.id;
+}
+
+/**
+ * Keurt een NIEUWE registratie goed door deze te koppelen aan een BESTAANDE VvE-groep.
+ * De moduletoegang van die groep geldt automatisch mee. Verstuurt de goedkeuringsmail.
+ */
+export async function approveVveLinkGroup(vveDocId, email, naam, groupId) {
+  const groupSnap = await getDoc(doc(db, "vveGroups", groupId));
+  const moduleAccess = groupSnap.exists() ? groupSnap.data().moduleAccess || {} : {};
+  const vveRef = doc(db, "vves", vveDocId);
+  await updateDoc(vveRef, {
+    status: "approved",
+    groupId: groupId,
     approvedAt: serverTimestamp(),
   });
   await sendApprovalEmail(email, naam, moduleAccess);
+  return groupId;
 }
 
-export async function setModuleAccess(vveDocId, slug, enabled) {
-  const ref = doc(db, "vves", vveDocId);
+/**
+ * Zet moduletoegang voor een hele VvE-groep tegelijk (geldt voor alle gekoppelde
+ * accounts). Verstuurt de update-mail naar elk gekoppeld, goedgekeurd lid.
+ */
+export async function setGroupModuleAccess(groupId, slug, enabled, previousModuleAccess, groupNaam, members) {
+  const ref = doc(db, "vveGroups", groupId);
   await updateDoc(ref, { [`moduleAccess.${slug}`]: enabled });
+  const newModuleAccess = Object.assign({}, previousModuleAccess, { [slug]: enabled });
+  for (const member of members || []) {
+    await sendModulesUpdatedEmail(member.email, member.naam || groupNaam, newModuleAccess, previousModuleAccess);
+  }
+  return newModuleAccess;
+}
+
+/**
+ * Ontkoppelt een account van zijn huidige VvE-groep, door voor dat account een
+ * NIEUWE, losse groep aan te maken (met dezelfde naam/modules als startpunt, zodat
+ * niemand per ongeluk zonder toegang komt te zitten). De oude groep blijft
+ * ongewijzigd voor de overige gekoppelde leden.
+ */
+export async function unlinkVveFromGroup(vveDocId, currentGroup) {
+  const newGroupRef = doc(collection(db, "vveGroups"));
+  await setDoc(newGroupRef, {
+    naam: (currentGroup && currentGroup.naam) || "",
+    code: suggestGroupCode((currentGroup && currentGroup.naam) || "VVE"),
+    moduleAccess: (currentGroup && currentGroup.moduleAccess) || {},
+    createdAt: serverTimestamp(),
+  });
+  const vveRef = doc(db, "vves", vveDocId);
+  await updateDoc(vveRef, { groupId: newGroupRef.id });
+  return newGroupRef.id;
 }
 
 // ======================= Gebruiksstatistiek (gestart / afgerond) =======================

@@ -1,4 +1,4 @@
-// fix 41
+// fix 46
 // Plak deze regels in: Firebase Console > Firestore Database > Rules > tekst vervangen > Publiceren
 
 rules_version = '2';
@@ -15,21 +15,30 @@ service cloud.firestore {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
 
       // Bij registratie maakt de gebruiker zelf het eigen document aan, met vaste
-      // beginwaarden (status altijd 'pending', nog geen moduletoegang).
+      // beginwaarden (status altijd 'pending'). Moduletoegang zit niet meer hier,
+      // maar op groepsniveau (vveGroups), pas gekoppeld bij goedkeuring.
       allow create: if isSignedIn() && request.auth.uid == uid
-                    && request.resource.data.keys().hasOnly(['email', 'naam', 'status', 'moduleAccess', 'createdAt'])
-                    && request.resource.data.status == 'pending'
-                    && request.resource.data.moduleAccess == {};
+                    && request.resource.data.keys().hasOnly(['email', 'naam', 'status', 'createdAt'])
+                    && request.resource.data.status == 'pending';
 
-      // Alleen de beheerder mag goedkeuren, modules toewijzen, of iets anders wijzigen.
-      // Uitzondering: een VvE mag het eigen 'progress'-veld (gestart/afgerond per module)
-      // bijwerken, om gebruiksstatistieken mogelijk te maken — nooit status of moduleAccess.
+      // Alleen de beheerder mag goedkeuren, aan een VvE-groep koppelen, of iets
+      // anders wijzigen. Uitzondering: een VvE mag het eigen 'progress'-veld
+      // (gestart/afgerond per module) bijwerken, nooit status of groupId.
       allow update: if isAdmin()
                     || (isSignedIn() && request.auth.uid == uid
                         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress']));
 
       // Alleen de beheerder mag een registratie verwijderen.
       allow delete: if isAdmin();
+    }
+
+    match /vveGroups/{groupId} {
+      // Elke ingelogde gebruiker mag groepsgegevens lezen (nodig om de eigen
+      // moduletoegang te kunnen bepalen). Bevat geen gevoelige gegevens van andere
+      // VvE's — alleen naam, code en moduletoegang, geen persoonsgegevens.
+      allow read: if isSignedIn();
+      // Alleen de beheerder maakt/wijzigt VvE-groepen.
+      allow write: if isAdmin();
     }
 
     match /config/{docId} {

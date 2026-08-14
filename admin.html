@@ -1,4 +1,4 @@
-<!-- fix 45 -->
+<!-- fix 46 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -138,8 +138,12 @@
 </main>
 
 <script type="module">
-  import { auth, watchAuth, adminSignInWithGoogle, getAllVves, approveVve, setModuleAccess, sendModulesUpdatedEmail, deleteVve, getTikkieConfig, setTikkieConfig, logout } from './assets/vve-auth.js?v45';
-  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v45';
+  import {
+    auth, watchAuth, adminSignInWithGoogle, getAllVves, getAllGroups, suggestGroupCode,
+    approveVveNewGroup, approveVveLinkGroup, setGroupModuleAccess, unlinkVveFromGroup,
+    deleteVve, getTikkieConfig, setTikkieConfig, logout
+  } from './assets/vve-auth.js?v46';
+  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v46';
 
   const loginWrap = document.getElementById('loginWrap');
   const main = document.getElementById('main');
@@ -204,7 +208,7 @@
     });
   }
 
-  function renderPendingCard(vve){
+  function renderPendingCard(vve, groups){
     var card = document.createElement('div');
     card.className = 'vve-card pending';
 
@@ -225,6 +229,41 @@
     body.appendChild(bodyInner);
     card.appendChild(body);
 
+    // --- modus-keuze: nieuwe VvE of koppelen aan bestaande ---
+    var modeWrap = document.createElement('div');
+    modeWrap.style.cssText = 'display:flex; gap:8px; margin-bottom:14px;';
+    var modeNewBtn = document.createElement('button');
+    modeNewBtn.type = 'button';
+    modeNewBtn.textContent = 'Nieuwe VvE';
+    var modeLinkBtn = document.createElement('button');
+    modeLinkBtn.type = 'button';
+    modeLinkBtn.textContent = 'Koppel aan bestaande VvE';
+    modeLinkBtn.style.cssText = 'background:var(--paper-dark); color:var(--ink-text);';
+    modeWrap.appendChild(modeNewBtn);
+    modeWrap.appendChild(modeLinkBtn);
+    bodyInner.appendChild(modeWrap);
+
+    // --- modus: nieuwe VvE ---
+    var newPane = document.createElement('div');
+    var naamLabel = document.createElement('label');
+    naamLabel.style.cssText = 'display:block; font-size:12px; font-weight:600; margin-bottom:4px;';
+    naamLabel.textContent = 'VvE-naam';
+    var naamInput = document.createElement('input');
+    naamInput.type = 'text';
+    naamInput.value = vve.naam || '';
+    naamInput.style.cssText = 'width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid var(--rule-soft); border-radius:3px; font-size:13.5px; margin-bottom:10px;';
+    var codeLabel = document.createElement('label');
+    codeLabel.style.cssText = 'display:block; font-size:12px; font-weight:600; margin-bottom:4px;';
+    codeLabel.textContent = 'VvE-code (uniek, voor herkenning bij koppelen)';
+    var codeInput = document.createElement('input');
+    codeInput.type = 'text';
+    codeInput.value = suggestGroupCode(vve.naam);
+    codeInput.style.cssText = 'width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid var(--rule-soft); border-radius:3px; font-size:13.5px; margin-bottom:14px;';
+    newPane.appendChild(naamLabel);
+    newPane.appendChild(naamInput);
+    newPane.appendChild(codeLabel);
+    newPane.appendChild(codeInput);
+
     var grid = document.createElement('div');
     grid.className = 'module-grid';
     ALL_MODULES.forEach(function(mod){
@@ -237,12 +276,12 @@
       label.appendChild(document.createTextNode(mod.title));
       grid.appendChild(label);
     });
-    bodyInner.appendChild(grid);
+    newPane.appendChild(grid);
 
     var approveBtn = document.createElement('button');
     approveBtn.type = 'button';
     approveBtn.className = 'approve-btn';
-    approveBtn.textContent = '\u2713 Goedkeuren met gekozen modules';
+    approveBtn.textContent = '\u2713 Goedkeuren als nieuwe VvE';
     approveBtn.addEventListener('click', async function(){
       var chosen = [...grid.querySelectorAll('input:checked')].map(function(cb){ return cb.value; });
       var moduleAccess = {};
@@ -250,22 +289,86 @@
       approveBtn.disabled = true;
       approveBtn.textContent = 'Bezig...';
       try {
-        await approveVve(vve.id, vve.email, vve.naam, moduleAccess);
+        await approveVveNewGroup(vve.id, vve.email, vve.naam, naamInput.value.trim(), codeInput.value.trim(), moduleAccess);
         renderAll();
       } catch (err) {
         alert('Goedkeuren mislukt: ' + (err && err.message ? err.message : err));
         approveBtn.disabled = false;
-        approveBtn.textContent = '\u2713 Goedkeuren met gekozen modules';
+        approveBtn.textContent = '\u2713 Goedkeuren als nieuwe VvE';
       }
     });
-    bodyInner.appendChild(approveBtn);
+    newPane.appendChild(approveBtn);
+    bodyInner.appendChild(newPane);
+
+    // --- modus: koppel aan bestaande VvE ---
+    var linkPane = document.createElement('div');
+    linkPane.style.display = 'none';
+    var linkLabel = document.createElement('label');
+    linkLabel.style.cssText = 'display:block; font-size:12px; font-weight:600; margin-bottom:4px;';
+    linkLabel.textContent = 'Bestaande VvE';
+    var select = document.createElement('select');
+    select.style.cssText = 'width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid var(--rule-soft); border-radius:3px; font-size:13.5px; margin-bottom:10px;';
+    var placeholderOpt = document.createElement('option');
+    placeholderOpt.value = '';
+    placeholderOpt.textContent = '\u2014 kies een VvE \u2014';
+    select.appendChild(placeholderOpt);
+    (groups || []).forEach(function(g){
+      var opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = (g.naam || '(naam onbekend)') + '  \u00b7  ' + (g.code || '');
+      select.appendChild(opt);
+    });
+    var preview = document.createElement('div');
+    preview.style.cssText = 'font-size:12.5px; color:var(--ink-fade); margin-bottom:12px; min-height:16px;';
+    select.addEventListener('change', function(){
+      var g = (groups || []).find(function(x){ return x.id === select.value; });
+      if (!g) { preview.textContent = ''; return; }
+      var mods = ALL_MODULES.filter(function(m){ return g.moduleAccess && g.moduleAccess[m.slug] === true; }).map(function(m){ return m.title; });
+      preview.textContent = mods.length ? ('Huidige modules van deze VvE: ' + mods.join(', ')) : 'Deze VvE heeft nog geen modules.';
+    });
+    linkPane.appendChild(linkLabel);
+    linkPane.appendChild(select);
+    linkPane.appendChild(preview);
+
+    var linkBtn = document.createElement('button');
+    linkBtn.type = 'button';
+    linkBtn.className = 'approve-btn';
+    linkBtn.textContent = '\u2713 Goedkeuren en koppelen';
+    linkBtn.addEventListener('click', async function(){
+      if (!select.value) { alert('Kies eerst een bestaande VvE om aan te koppelen.'); return; }
+      linkBtn.disabled = true;
+      linkBtn.textContent = 'Bezig...';
+      try {
+        await approveVveLinkGroup(vve.id, vve.email, vve.naam, select.value);
+        renderAll();
+      } catch (err) {
+        alert('Koppelen mislukt: ' + (err && err.message ? err.message : err));
+        linkBtn.disabled = false;
+        linkBtn.textContent = '\u2713 Goedkeuren en koppelen';
+      }
+    });
+    linkPane.appendChild(linkBtn);
+    bodyInner.appendChild(linkPane);
+
+    modeNewBtn.addEventListener('click', function(){
+      newPane.style.display = ''; linkPane.style.display = 'none';
+      modeNewBtn.style.background = ''; modeNewBtn.style.color = '';
+      modeLinkBtn.style.background = 'var(--paper-dark)'; modeLinkBtn.style.color = 'var(--ink-text)';
+      if (card.classList.contains('open')) body.style.maxHeight = body.scrollHeight + 40 + 'px';
+    });
+    modeLinkBtn.addEventListener('click', function(){
+      linkPane.style.display = ''; newPane.style.display = 'none';
+      modeLinkBtn.style.background = ''; modeLinkBtn.style.color = '';
+      modeNewBtn.style.background = 'var(--paper-dark)'; modeNewBtn.style.color = 'var(--ink-text)';
+      if (card.classList.contains('open')) body.style.maxHeight = body.scrollHeight + 40 + 'px';
+    });
 
     makeCollapsible(card, head, body);
     attachDelete(card, vve);
     return card;
   }
 
-  function renderApprovedCard(vve){
+  function renderGroupCard(group, members){
     var card = document.createElement('div');
     card.className = 'vve-card';
 
@@ -273,10 +376,9 @@
     head.className = 'vve-head';
     head.innerHTML =
       '<span class="chevron">\u25b8</span>' +
-      '<span class="vve-name">' + (vve.naam || '(naam onbekend)') + '</span>' +
-      '<span class="vve-email">' + vve.email + '</span>' +
-      '<span class="status-badge approved">Goedgekeurd</span>' +
-      '<button type="button" class="delete-btn">Verwijderen</button>';
+      '<span class="vve-name">' + (group.naam || '(naam onbekend)') + '</span>' +
+      '<span class="vve-email">' + (group.code || '') + '</span>' +
+      '<span class="status-badge approved">' + members.length + ' account' + (members.length === 1 ? '' : 's') + '</span>';
     card.appendChild(head);
 
     var body = document.createElement('div');
@@ -286,37 +388,71 @@
     body.appendChild(bodyInner);
     card.appendChild(body);
 
+    // --- leden van deze VvE-groep ---
+    var membersLabel = document.createElement('div');
+    membersLabel.style.cssText = 'font-size:11.5px; font-weight:600; color:var(--ink-fade); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;';
+    membersLabel.textContent = 'Gekoppelde accounts';
+    bodyInner.appendChild(membersLabel);
+
+    var membersList = document.createElement('div');
+    membersList.style.cssText = 'margin-bottom:16px;';
+    members.forEach(function(vve){
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px dotted var(--rule-soft); font-size:13px;';
+      var emailSpan = document.createElement('span');
+      emailSpan.style.cssText = 'font-family:\'IBM Plex Mono\',monospace; flex:1;';
+      emailSpan.textContent = vve.email;
+      row.appendChild(emailSpan);
+
+      var unlinkBtn = document.createElement('button');
+      unlinkBtn.type = 'button';
+      unlinkBtn.textContent = 'Ontkoppelen';
+      unlinkBtn.style.cssText = 'background:none; border:1px solid var(--rule-soft); color:var(--ink-fade); font-size:10.5px; padding:4px 8px;';
+      unlinkBtn.addEventListener('click', async function(e){
+        e.stopPropagation();
+        if (members.length <= 1) { alert('Dit is het enige account in deze VvE — ontkoppelen heeft geen effect.'); return; }
+        var ok = window.confirm('Weet je zeker dat je ' + vve.email + ' wilt loskoppelen van ' + (group.naam || 'deze VvE') + '? Dit account krijgt een eigen, losse VvE-registratie met dezelfde modules als startpunt.');
+        if (!ok) return;
+        try {
+          await unlinkVveFromGroup(vve.id, group);
+          renderAll();
+        } catch (err) {
+          alert('Ontkoppelen mislukt: ' + (err && err.message ? err.message : err));
+        }
+      });
+      row.appendChild(unlinkBtn);
+
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.textContent = 'Verwijderen';
+      delBtn.style.cssText = 'background:none; border:1px solid var(--debit); color:var(--debit); font-size:10.5px; padding:4px 8px;';
+      delBtn.addEventListener('click', async function(e){
+        e.stopPropagation();
+        var ok = window.confirm('Weet je zeker dat je het account ' + vve.email + ' wilt verwijderen?');
+        if (!ok) return;
+        try {
+          await deleteVve(vve.id);
+          renderAll();
+        } catch (err) {
+          alert('Verwijderen mislukt: ' + (err && err.message ? err.message : err));
+        }
+      });
+      row.appendChild(delBtn);
+
+      membersList.appendChild(row);
+    });
+    bodyInner.appendChild(membersList);
+
+    // --- gedeelde moduletoegang voor de hele groep ---
+    var modulesLabel = document.createElement('div');
+    modulesLabel.style.cssText = 'font-size:11.5px; font-weight:600; color:var(--ink-fade); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;';
+    modulesLabel.textContent = 'Moduletoegang (geldt voor alle accounts hierboven)';
+    bodyInner.appendChild(modulesLabel);
+
     var grid = document.createElement('div');
     grid.className = 'module-grid';
-    var hasPendingChange = false;
-    var beforeSnapshot = null;
-
-    var notifyBtn = document.createElement('button');
-    notifyBtn.type = 'button';
-    notifyBtn.className = 'approve-btn';
-    notifyBtn.textContent = '\u2713 Wijzigingen doorgeven (mail versturen)';
-    notifyBtn.style.display = 'none';
-    notifyBtn.addEventListener('click', async function(){
-      notifyBtn.disabled = true;
-      notifyBtn.textContent = 'Bezig...';
-      try {
-        await sendModulesUpdatedEmail(vve.email, vve.naam, vve.moduleAccess, beforeSnapshot);
-        hasPendingChange = false;
-        beforeSnapshot = null;
-        notifyBtn.style.display = 'none';
-        if (card.classList.contains('open')) {
-          body.style.maxHeight = body.scrollHeight + 40 + 'px';
-        }
-      } catch (err) {
-        alert('Versturen mislukt: ' + (err && err.message ? err.message : err));
-      } finally {
-        notifyBtn.disabled = false;
-        notifyBtn.textContent = '\u2713 Wijzigingen doorgeven (mail versturen)';
-      }
-    });
-
     ALL_MODULES.forEach(function(mod){
-      var enabled = !!(vve.moduleAccess && vve.moduleAccess[mod.slug] === true);
+      var enabled = !!(group.moduleAccess && group.moduleAccess[mod.slug] === true);
       var label = document.createElement('label');
       label.className = 'module-toggle';
       var checkbox = document.createElement('input');
@@ -324,22 +460,10 @@
       checkbox.checked = enabled;
       checkbox.addEventListener('change', async function(){
         label.classList.add('saving');
+        var previous = Object.assign({}, group.moduleAccess || {});
         try {
-          if (!hasPendingChange) {
-            // Bewaar de stand van vóór deze reeks wijzigingen, voor het 'wat is
-            // gewijzigd'-overzicht in de mail.
-            beforeSnapshot = Object.assign({}, vve.moduleAccess || {});
-          }
-          await setModuleAccess(vve.id, mod.slug, checkbox.checked);
-          if (!vve.moduleAccess) vve.moduleAccess = {};
-          vve.moduleAccess[mod.slug] = checkbox.checked;
-          // Wijziging wordt direct opgeslagen, maar de mail gaat pas na een
-          // bewuste klik op 'Wijzigingen doorgeven' hieronder.
-          hasPendingChange = true;
-          notifyBtn.style.display = 'inline-block';
-          if (card.classList.contains('open')) {
-            body.style.maxHeight = body.scrollHeight + 40 + 'px';
-          }
+          var updated = await setGroupModuleAccess(group.id, mod.slug, checkbox.checked, previous, group.naam, members);
+          group.moduleAccess = updated;
         } catch (err) {
           alert('Opslaan mislukt: ' + (err && err.message ? err.message : err));
           checkbox.checked = !checkbox.checked;
@@ -352,15 +476,17 @@
       grid.appendChild(label);
     });
     bodyInner.appendChild(grid);
-    bodyInner.appendChild(notifyBtn);
 
     makeCollapsible(card, head, body);
-    attachDelete(card, vve);
     return card;
   }
 
   async function renderAll(){
     var vves = await getAllVves();
+    var groups = await getAllGroups();
+    var groupsById = {};
+    groups.forEach(function(g){ groupsById[g.id] = g; });
+
     var pending = vves.filter(function(v){ return v.status === 'pending'; });
     var approved = vves.filter(function(v){ return v.status === 'approved'; });
 
@@ -368,23 +494,81 @@
     if (pending.length === 0) {
       pendingList.innerHTML = '<div class="empty">Geen wachtende aanvragen.</div>';
     } else {
-      pending.forEach(function(vve){ pendingList.appendChild(renderPendingCard(vve)); });
+      pending.forEach(function(vve){ pendingList.appendChild(renderPendingCard(vve, groups)); });
     }
+
+    // Groepeer goedgekeurde accounts per VvE-groep. Accounts zonder groupId zijn
+    // 'wees'-accounts (bv. van vóór de VvE-groepen bestonden) en krijgen een
+    // migratieknop om alsnog een eigen groep te krijgen.
+    var byGroup = {};
+    var orphans = [];
+    approved.forEach(function(vve){
+      if (vve.groupId && groupsById[vve.groupId]) {
+        if (!byGroup[vve.groupId]) byGroup[vve.groupId] = [];
+        byGroup[vve.groupId].push(vve);
+      } else {
+        orphans.push(vve);
+      }
+    });
 
     approvedList.innerHTML = '';
-    if (approved.length === 0) {
+    var groupIds = Object.keys(byGroup);
+    if (groupIds.length === 0 && orphans.length === 0) {
       approvedList.innerHTML = '<div class="empty">Nog geen goedgekeurde VvE\u2019s.</div>';
     } else {
-      approved.forEach(function(vve){ approvedList.appendChild(renderApprovedCard(vve)); });
+      groupIds
+        .sort(function(a, b){ return (groupsById[a].naam || '').localeCompare(groupsById[b].naam || ''); })
+        .forEach(function(gid){
+          approvedList.appendChild(renderGroupCard(groupsById[gid], byGroup[gid]));
+        });
+      orphans.forEach(function(vve){
+        approvedList.appendChild(renderOrphanCard(vve));
+      });
     }
 
-    renderStats(approved);
+    renderStats(approved, groupsById);
   }
 
-  function renderStats(approved){
+  function renderOrphanCard(vve){
+    var card = document.createElement('div');
+    card.className = 'vve-card';
+    card.style.border = '1px dashed var(--debit)';
+
+    var head = document.createElement('div');
+    head.className = 'vve-head';
+    head.style.cursor = 'default';
+    head.innerHTML =
+      '<span class="vve-name">' + (vve.naam || '(naam onbekend)') + '</span>' +
+      '<span class="vve-email">' + vve.email + '</span>' +
+      '<span class="status-badge pending">Nog niet gekoppeld</span>';
+    card.appendChild(head);
+
+    var bodyInner = document.createElement('div');
+    bodyInner.style.padding = '0 22px 20px';
+    bodyInner.innerHTML = '<p style="font-size:12.5px; color:var(--ink-fade); margin:0 0 10px;">Dit account is goedgekeurd, maar (nog) niet gekoppeld aan een VvE-groep — waarschijnlijk van vóór de VvE-groepen bestonden. Maak alsnog een eigen groep aan, zonder modules opnieuw te hoeven kiezen als je die al kende.</p>';
+    var fixBtn = document.createElement('button');
+    fixBtn.type = 'button';
+    fixBtn.textContent = 'Maak eigen VvE-groep aan';
+    fixBtn.addEventListener('click', async function(){
+      fixBtn.disabled = true;
+      try {
+        await approveVveNewGroup(vve.id, vve.email, vve.naam, vve.naam, suggestGroupCode(vve.naam), {});
+        renderAll();
+      } catch (err) {
+        alert('Mislukt: ' + (err && err.message ? err.message : err));
+        fixBtn.disabled = false;
+      }
+    });
+    bodyInner.appendChild(fixBtn);
+    card.appendChild(bodyInner);
+    return card;
+  }
+
+  function renderStats(approved, groupsById){
     var counts = ALL_MODULES.map(function(mod){
       var toegekend = approved.filter(function(vve){
-        return vve.moduleAccess && vve.moduleAccess[mod.slug] === true;
+        var g = vve.groupId && groupsById[vve.groupId];
+        return g && g.moduleAccess && g.moduleAccess[mod.slug] === true;
       }).length;
       var gestart = approved.filter(function(vve){
         return vve.progress && vve.progress[mod.slug] && vve.progress[mod.slug].started === true;

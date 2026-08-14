@@ -1,4 +1,4 @@
-<!-- fix 45 -->
+<!-- fix 46 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -744,8 +744,8 @@
 </footer>
 
 <script type="module">
-  import { watchAuth, getVveDocForCurrentUser, sendModuleRequestEmail, getTikkieConfig, isTikkieValid, logout } from './assets/vve-auth.js?v45';
-  import { PAYMENT_IBAN, PAYMENT_TNV, PAYMENT_PRICE } from './assets/firebase-config.js?v45';
+  import { watchAuth, getVveDocForCurrentUser, getGroupForCurrentUser, sendModuleRequestEmail, getTikkieConfig, isTikkieValid, logout } from './assets/vve-auth.js?v46';
+  import { PAYMENT_IBAN, PAYMENT_TNV, PAYMENT_PRICE } from './assets/firebase-config.js?v46';
 
   function updateLoginStatus(user, vve){
     var link = document.getElementById('loginStatusLink');
@@ -911,8 +911,9 @@
       var vve = await getVveDocForCurrentUser();
       updateLoginStatus(user, vve);
       applyProgressBadges(user.uid);
-      if (vve && vve.status === 'approved') {
-        applyAccess(vve.moduleAccess || {}, { email: vve.email, naam: vve.naam });
+      if (vve && vve.status === 'approved' && vve.groupId) {
+        var group = await getGroupForCurrentUser();
+        applyAccess((group && group.moduleAccess) || {}, { email: vve.email, naam: vve.naam });
       } else {
         applyAccess({}, null);
       }

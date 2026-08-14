@@ -1,4 +1,4 @@
-// fix 46
+// fix 47
 // Gedeelde Firebase Authentication + Firestore helpers.
 // Patroon: registratie met e-mail/wachtwoord -> pending-status -> admin keurt goed en
 // wijst modules toe -> bevestigingsmail bij registratie én bij goedkeuring (via EmailJS).
@@ -32,7 +32,7 @@ import {
   EMAILJS_TEMPLATE_ID,
   ALL_MODULES,
   ADMIN_EMAIL,
-} from "./firebase-config.js?v46";
+} from "./firebase-config.js?v47";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -183,6 +183,21 @@ export async function setGroupModuleAccess(groupId, slug, enabled, previousModul
   const ref = doc(db, "vveGroups", groupId);
   await updateDoc(ref, { [`moduleAccess.${slug}`]: enabled });
   const newModuleAccess = Object.assign({}, previousModuleAccess, { [slug]: enabled });
+  for (const member of members || []) {
+    await sendModulesUpdatedEmail(member.email, member.naam || groupNaam, newModuleAccess, previousModuleAccess);
+  }
+  return newModuleAccess;
+}
+
+/**
+ * Bevestigt een hele set moduletoegang-wijzigingen in één keer (i.p.v. direct per
+ * checkbox), en verstuurt daarna één update-mail per gekoppeld lid met het overzicht
+ * van wat er is gewijzigd. Bedoeld voor een expliciete 'bevestig wijzigingen'-knop,
+ * zodat een los aan/uit-klikje nooit direct iets opslaat of verstuurt.
+ */
+export async function confirmGroupModuleAccess(groupId, newModuleAccess, previousModuleAccess, groupNaam, members) {
+  const ref = doc(db, "vveGroups", groupId);
+  await updateDoc(ref, { moduleAccess: newModuleAccess });
   for (const member of members || []) {
     await sendModulesUpdatedEmail(member.email, member.naam || groupNaam, newModuleAccess, previousModuleAccess);
   }

@@ -1,4 +1,4 @@
-<!-- fix 46 -->
+<!-- fix 47 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -140,10 +140,10 @@
 <script type="module">
   import {
     auth, watchAuth, adminSignInWithGoogle, getAllVves, getAllGroups, suggestGroupCode,
-    approveVveNewGroup, approveVveLinkGroup, setGroupModuleAccess, unlinkVveFromGroup,
+    approveVveNewGroup, approveVveLinkGroup, confirmGroupModuleAccess, unlinkVveFromGroup,
     deleteVve, getTikkieConfig, setTikkieConfig, logout
-  } from './assets/vve-auth.js?v46';
-  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v46';
+  } from './assets/vve-auth.js?v47';
+  import { ADMIN_EMAIL, ALL_MODULES } from './assets/firebase-config.js?v47';
 
   const loginWrap = document.getElementById('loginWrap');
   const main = document.getElementById('main');
@@ -449,6 +449,29 @@
     modulesLabel.textContent = 'Moduletoegang (geldt voor alle accounts hierboven)';
     bodyInner.appendChild(modulesLabel);
 
+    var originalModuleAccess = Object.assign({}, group.moduleAccess || {});
+    var pendingModuleAccess = Object.assign({}, originalModuleAccess);
+    var hasPendingChange = false;
+
+    var actionsWrap = document.createElement('div');
+    actionsWrap.style.cssText = 'display:none; gap:8px; margin-top:12px;';
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'approve-btn';
+    confirmBtn.textContent = '\u2713 Bevestig wijzigingen (mail versturen)';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = 'Annuleren';
+    cancelBtn.style.cssText = 'background:none; border:1px solid var(--rule-soft); color:var(--ink-fade);';
+    actionsWrap.appendChild(confirmBtn);
+    actionsWrap.appendChild(cancelBtn);
+
+    function refreshHeightIfOpen(){
+      if (card.classList.contains('open')) {
+        body.style.maxHeight = body.scrollHeight + 40 + 'px';
+      }
+    }
+
     var grid = document.createElement('div');
     grid.className = 'module-grid';
     ALL_MODULES.forEach(function(mod){
@@ -458,24 +481,50 @@
       var checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.checked = enabled;
-      checkbox.addEventListener('change', async function(){
-        label.classList.add('saving');
-        var previous = Object.assign({}, group.moduleAccess || {});
-        try {
-          var updated = await setGroupModuleAccess(group.id, mod.slug, checkbox.checked, previous, group.naam, members);
-          group.moduleAccess = updated;
-        } catch (err) {
-          alert('Opslaan mislukt: ' + (err && err.message ? err.message : err));
-          checkbox.checked = !checkbox.checked;
-        } finally {
-          label.classList.remove('saving');
-        }
+      checkbox.addEventListener('change', function(){
+        // Wijzigt alleen de lokale, nog niet opgeslagen stand — pas na een bewuste
+        // klik op 'Bevestig wijzigingen' wordt dit echt opgeslagen en gemaild.
+        pendingModuleAccess[mod.slug] = checkbox.checked;
+        hasPendingChange = true;
+        actionsWrap.style.display = 'flex';
+        refreshHeightIfOpen();
       });
       label.appendChild(checkbox);
       label.appendChild(document.createTextNode(mod.title));
       grid.appendChild(label);
     });
     bodyInner.appendChild(grid);
+    bodyInner.appendChild(actionsWrap);
+
+    cancelBtn.addEventListener('click', function(){
+      pendingModuleAccess = Object.assign({}, originalModuleAccess);
+      grid.querySelectorAll('input[type="checkbox"]').forEach(function(cb, i){
+        cb.checked = !!originalModuleAccess[ALL_MODULES[i].slug];
+      });
+      hasPendingChange = false;
+      actionsWrap.style.display = 'none';
+      refreshHeightIfOpen();
+    });
+
+    confirmBtn.addEventListener('click', async function(){
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      confirmBtn.textContent = 'Bezig...';
+      try {
+        var updated = await confirmGroupModuleAccess(group.id, pendingModuleAccess, originalModuleAccess, group.naam, members);
+        group.moduleAccess = updated;
+        originalModuleAccess = Object.assign({}, updated);
+        hasPendingChange = false;
+        actionsWrap.style.display = 'none';
+        refreshHeightIfOpen();
+      } catch (err) {
+        alert('Opslaan mislukt: ' + (err && err.message ? err.message : err));
+      } finally {
+        confirmBtn.disabled = false;
+        cancelBtn.disabled = false;
+        confirmBtn.textContent = '\u2713 Bevestig wijzigingen (mail versturen)';
+      }
+    });
 
     makeCollapsible(card, head, body);
     return card;

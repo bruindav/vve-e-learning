@@ -1,4 +1,4 @@
-// fix 47
+// fix 48
 // Gedeelde Firebase Authentication + Firestore helpers.
 // Patroon: registratie met e-mail/wachtwoord -> pending-status -> admin keurt goed en
 // wijst modules toe -> bevestigingsmail bij registratie én bij goedkeuring (via EmailJS).
@@ -32,7 +32,7 @@ import {
   EMAILJS_TEMPLATE_ID,
   ALL_MODULES,
   ADMIN_EMAIL,
-} from "./firebase-config.js?v47";
+} from "./firebase-config.js?v48";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

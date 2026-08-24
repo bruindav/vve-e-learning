@@ -1,0 +1,526 @@
+<!-- fix 48 -->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.style.visibility='hidden';</script>
+<script type="module">
+  import { guardModule } from '../assets/module-gate.js?v48';
+  guardModule('laadpalen');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laadpalen, e-bikes en scootmobielen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-navy:#132228;
+    --ink-navy-deep:#0d1a1f;
+    --paper:#ECE4D1;
+    --paper-dark:#E2D8BF;
+    --rule:#2F4F44;
+    --rule-soft:#2F4F4433;
+    --ink-text:#2A2118;
+    --ink-fade:#5A5040;
+    --amber:#C98A2C;
+    --amber-deep:#a86f1c;
+    --debit:#a13d2c;
+    --credit:#3d6b52;
+    --slate:#3d5a6b;
+    --cream-on-navy:#EDE6D6;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--ink-navy); color:var(--ink-text); font-family:'IBM Plex Sans', sans-serif; line-height:1.55;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0;}
+
+  .brandbar{
+    background:var(--ink-navy-deep);
+    border-bottom:1px solid #ffffff14;
+    padding:10px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+  }
+  .brandbar .brand{display:flex; align-items:center; gap:9px;}
+  .brandbar .brand svg{display:block;}
+  .brandbar .brand span{
+    font-size:15px; font-weight:600; color:#f2efe6; letter-spacing:-.01em; font-family:'IBM Plex Sans', sans-serif;
+  }
+  .brandbar .tagline{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#6f93a8; letter-spacing:.02em;
+  }
+  .back-link{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:#e0a94b; text-decoration:none;
+    border:1px solid #e0a94b40; padding:5px 10px; border-radius:2px; white-space:nowrap;
+  }
+  .back-link:hover{background:#e0a94b1a;}
+  @media (max-width:480px){ .brandbar .tagline{display:none;} }
+
+  .progressbar{
+    position:sticky; top:0; z-index:50; background:var(--ink-navy-deep); border-bottom:1px solid #ffffff14;
+    padding:10px 20px; display:flex; align-items:center; gap:14px;
+  }
+  .progressbar .label{color:var(--cream-on-navy); font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.06em; opacity:.75; white-space:nowrap;}
+  .progress-track{flex:1; height:6px; background:#ffffff1a; border-radius:3px; overflow:hidden;}
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--amber),#e0a94b); transition:width .5s ease;}
+  .progress-count{color:var(--amber); font-family:'IBM Plex Mono',monospace; font-size:12px; white-space:nowrap;}
+
+  .cover{
+    padding:72px 24px 56px; text-align:center; color:var(--cream-on-navy);
+    background:radial-gradient(ellipse at 30% -10%, #1c343c 0%, transparent 55%), var(--ink-navy);
+    border-bottom:1px solid #ffffff14;
+  }
+  .cover .eyebrow{
+    font-family:'IBM Plex Mono', monospace; letter-spacing:.18em; text-transform:uppercase; font-size:12px;
+    color:var(--amber); margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .cover .eyebrow .badge{background:var(--slate); color:#dce8ee; padding:3px 8px; border-radius:2px; letter-spacing:.04em; font-size:10.5px;}
+  .cover h1{font-size:clamp(28px,4.6vw,46px); font-weight:600; max-width:800px; margin:0 auto; letter-spacing:-.01em;}
+  .cover p.sub{max-width:600px; margin:20px auto 0; color:#c9c0ab; font-size:16px;}
+  .cover .ledgerline{width:60px; height:2px; background:var(--amber); margin:28px auto 0;}
+
+  main{max-width:760px; margin:0 auto; padding:48px 20px 120px;}
+
+  .account{
+    background:var(--paper); border:1px solid var(--rule-soft); border-radius:2px; margin-bottom:28px;
+    box-shadow:0 1px 0 var(--rule-soft), 0 12px 30px -18px #00000080; overflow:hidden;
+  }
+  .account-head{
+    display:flex; align-items:center; gap:16px; padding:20px 22px; cursor:pointer; user-select:none;
+    background:linear-gradient(180deg, var(--paper), var(--paper-dark)); border-bottom:1px solid var(--rule-soft);
+  }
+  .acct-num{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600; color:var(--amber-deep);
+    background:#00000008; border:1px solid var(--rule-soft); padding:4px 8px; border-radius:2px; white-space:nowrap;
+  }
+  .acct-title{flex:1; min-width:0;}
+  .acct-title h2{font-size:19.5px; font-weight:600; overflow-wrap:break-word; word-break:break-word; hyphens:auto;}
+  .acct-title .kicker{font-size:12.5px; color:var(--ink-fade); font-family:'IBM Plex Mono',monospace; margin-top:2px; overflow-wrap:break-word;}
+  .chevron{width:22px;height:22px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--ink-fade); transition:transform .25s ease;}
+  .account.open .chevron{transform:rotate(90deg); color:var(--amber-deep);}
+  .check{
+    width:22px;height:22px; border-radius:50%; border:1.5px solid var(--rule); display:flex; align-items:center;
+    justify-content:center; flex-shrink:0; font-size:13px; color:transparent; transition:all .2s ease;
+  }
+  .check.done{background:var(--credit); border-color:var(--credit); color:#fff;}
+
+  .acct-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+  .account.open .acct-body{max-height:3200px;}
+  .acct-body-inner{padding:22px; padding-top:6px;}
+  .acct-body-inner p{margin:0 0 14px; font-size:15.5px;}
+  .acct-body-inner p:last-child{margin-bottom:0;}
+
+  .ledger-split{
+    display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--rule-soft); border-radius:2px;
+    overflow:hidden; margin:16px 0 20px; background:#fff8;
+  }
+  .ledger-split.three{grid-template-columns:1fr 1fr 1fr;}
+  .ledger-col{padding:14px 16px;}
+  .ledger-col + .ledger-col{border-left:1px dashed var(--rule-soft);}
+  .ledger-col h4{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.08em;
+    margin:0 0 10px; padding-bottom:8px; border-bottom:1px solid var(--rule-soft);
+  }
+  .ledger-col.slate h4{color:var(--slate);}
+  .ledger-col ul{margin:0; padding:0; list-style:none;}
+  .ledger-col li{font-size:13.5px; padding:5px 0; border-bottom:1px dotted var(--rule-soft);}
+  .ledger-col li:last-child{border-bottom:none;}
+
+  .callout{
+    background:#00000007; border-left:3px solid var(--amber); padding:12px 16px; border-radius:0 3px 3px 0;
+    font-size:14px; margin:14px 0; color:var(--ink-fade);
+  }
+  .callout strong{color:var(--ink-text);}
+  .callout.warn{border-left-color:var(--debit);}
+
+  .flags{margin:14px 0 4px; padding:0; list-style:none;}
+  .flags li{
+    font-size:14px; padding:9px 12px; margin-bottom:6px; border-radius:3px;
+    background:#a13d2c14; border:1px solid #a13d2c33; color:#7a2c1f; display:flex; gap:8px;
+  }
+  .flags li::before{content:"⚑"; flex-shrink:0;}
+
+  .escalation{margin:14px 0 4px; padding:0; list-style:none; counter-reset:esc;}
+  .escalation li{
+    font-size:14.5px; padding:12px 14px 12px 44px; margin-bottom:8px; border-radius:3px;
+    background:#fff9; border:1px solid var(--rule-soft); position:relative;
+  }
+  .escalation li::before{
+    counter-increment:esc; content:counter(esc);
+    position:absolute; left:12px; top:11px;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+    color:#fff; background:var(--debit);
+    width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .escalation li strong{display:block; margin-bottom:2px;}
+  .escalation li span.note{font-size:12.5px; color:var(--ink-fade);}
+
+  .quiz{margin-top:18px; padding-top:16px; border-top:1px solid var(--rule-soft);}
+  .quiz .q{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber-deep); margin-bottom:10px;}
+  .quiz .q-text{font-size:15px; font-weight:500; margin-bottom:12px;}
+  .opts{display:flex; flex-direction:column; gap:8px;}
+  .opt{
+    text-align:left; padding:11px 14px; border-radius:3px; border:1px solid var(--rule-soft); background:#fff9;
+    cursor:pointer; font-size:14.5px; font-family:inherit; color:var(--ink-text); transition:all .15s ease;
+  }
+  .opt:hover{border-color:var(--amber); background:#fff;}
+  .opt.correct{background:#3d6b521a; border-color:var(--credit); color:#264936; font-weight:600;}
+  .opt.wrong{background:#a13d2c1a; border-color:var(--debit); color:#7a2c1f;}
+  .opt[disabled]{cursor:default;}
+  .feedback{margin-top:10px; font-size:13.5px; padding:10px 12px; border-radius:3px; background:#00000006; display:none;}
+  .feedback.show{display:block;}
+
+  .final{padding:0; border:none; box-shadow:none; background:transparent;}
+  .final ul{margin:0; padding:0; list-style:none;}
+  .final li{display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px dotted var(--rule-soft); font-size:14.5px;}
+  .final li:last-child{border-bottom:none;}
+  .final li .dot{width:6px; height:6px; border-radius:50%; background:var(--amber); margin-top:8px; flex-shrink:0;}
+
+  .done-banner{
+    margin-top:22px; padding:30px 24px; border-radius:6px;
+    background:linear-gradient(135deg,#3d6b52,#2c5240);
+    color:#e8f0ea; display:none; flex-direction:column; align-items:center; text-align:center; gap:12px;
+  }
+  .done-banner.show{display:flex;}
+  .done-illustration{display:block; margin-bottom:2px;}
+  .done-compliment{font-family:'Fraunces',serif; font-size:21px; font-weight:600; color:#fff;}
+  .done-text{font-size:13.5px; line-height:1.65; color:#dceee2; max-width:460px; margin:0;}
+  .done-score{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#cfe3d6; margin-top:6px;
+    padding-top:14px; border-top:1px solid #ffffff22; width:100%; max-width:460px;
+  }
+  .done-score .num{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color:#fff;}
+  .done-actions{margin-top:8px; display:flex; justify-content:center;}
+  .done-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; font-weight:600; color:var(--ink-navy-deep);
+    background:var(--amber); border:none; padding:11px 20px; border-radius:3px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px; transition:background .15s ease;
+  }
+  .done-btn:hover{background:#e0a94b;}
+
+  footer{text-align:center; color:#7d7460; font-size:12.5px; padding:30px 20px 50px; font-family:'IBM Plex Mono',monospace;}
+
+  @media (max-width:520px){
+    .ledger-split, .ledger-split.three{grid-template-columns:1fr;}
+    .ledger-col + .ledger-col{border-left:none; border-top:1px dashed var(--rule-soft);}
+    .cover{padding:56px 18px 44px;}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto !important;}}
+</style>
+</head>
+<body>
+
+<div class="brandbar">
+  <div style="display:flex; align-items:center; gap:14px;">
+  <a href="../index.html" class="back-link">&larr; Overzicht</a>
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="12" y1="12" x2="4" y2="5" stroke="#4a9fc9" stroke-width="1.4"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#4a9fc9" stroke-width="1.4"/>
+      <line x1="12" y1="12" x2="5" y2="19" stroke="#4a9fc9" stroke-width="1.4"/>
+      <line x1="12" y1="12" x2="18" y2="18" stroke="#4a9fc9" stroke-width="1.4"/>
+      <circle cx="4" cy="5" r="2" fill="#e0a94b"/>
+      <circle cx="19" cy="6" r="1.6" fill="#4a9fc9"/>
+      <circle cx="5" cy="19" r="1.6" fill="#4a9fc9"/>
+      <circle cx="18" cy="18" r="2" fill="#e0a94b"/>
+      <circle cx="12" cy="12" r="3.4" fill="#3fa9dc"/>
+    </svg>
+    <span>digidave</span>
+  </div>
+  </div>
+  <div class="tagline">Een app van digidave</div>
+</div>
+
+<div class="progressbar">
+  <span class="label">VOORTGANG</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-count" id="progressCount">0 / 7</span>
+</div>
+
+<header class="cover">
+  <div class="eyebrow">E-learning · VvE-bestuur <span class="badge">TOEKOMSTGERICHT</span></div>
+  <h1>Laadpalen, e-bikes en scootmobielen</h1>
+  <p class="sub">Steeds meer leden willen een auto, e-bike of scootmobiel opladen bij het gebouw. Wat komt daarbij kijken, welke problemen zie je aankomen, en hoe pak je dit gestructureerd aan?</p>
+  <div class="ledgerline"></div>
+</header>
+
+<main>
+
+  <!-- 2200 -->
+  <section class="account" id="acct-0" data-acct>
+    <div class="account-head" onclick="toggle(0)">
+      <span class="acct-num">2200</span>
+      <div class="acct-title"><h2>Waarom dit nu op de agenda staat</h2><div class="kicker">Groeiende vraag, en een wettelijk kader</div></div>
+      <span class="check" id="check-0">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Steeds meer leden rijden elektrisch, fietsen elektrisch, of gebruiken een scootmobiel — en willen dat kunnen opladen bij het gebouw. Wat een individueel verzoek leek, is inmiddels een onderwerp waar vrijwel elk bestuur vroeg of laat mee te maken krijgt.</p>
+        <p>Er is bovendien een wettelijk kader dat het voor leden makkelijker maakt om een eigen laadpunt te realiseren: een VvE kan een redelijk verzoek van een lid voor een laadpunt op de eigen parkeerplaats niet zomaar weigeren, en moet een weigering goed onderbouwen. Dat betekent niet dat alles zomaar mag — de VvE mag wél eisen stellen aan een veilige en nette uitvoering.</p>
+        <div class="callout"><strong>Wacht niet op het eerste verzoek</strong> om hierover na te denken. Een doordacht plan vooraf voorkomt dat het bestuur van het ene ad-hoc besluit naar het andere hobbelt.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Kan een VvE een redelijk verzoek van een lid voor een eigen laadpunt zomaar weigeren?</div>
+        <div class="opts" data-quiz="1">
+          <button class="opt" data-correct="false" data-explain="Een VvE moet een weigering van een redelijk verzoek juist onderbouwen; zomaar weigeren kan niet.">Ja, een VvE mag altijd weigeren zonder opgaaf van reden</button>
+          <button class="opt" data-correct="true">Nee, een weigering moet goed onderbouwd zijn — de VvE mag wel eisen stellen aan een veilige uitvoering</button>
+          <button class="opt" data-correct="false" data-explain="De wet regelt vooral het recht om te mogen aanleggen, niet dat de VvE de kosten voor individuele leden moet dragen.">Nee, de VvE moet elk verzoek altijd volledig zelf betalen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2300 -->
+  <section class="account" id="acct-1" data-acct>
+    <div class="account-head" onclick="toggle(1)">
+      <span class="acct-num">2300</span>
+      <div class="acct-title"><h2>Drie soorten laadbehoefte</h2><div class="kicker">Auto, e-bike en scootmobiel vragen elk iets anders</div></div>
+      <span class="check" id="check-1">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <div class="ledger-split three">
+          <div class="ledger-col slate">
+            <h4>Elektrische auto</h4>
+            <ul><li>Op parkeerplaats of in garage</li><li>Grootste vermogen per laadpunt: vaak 3,7–22 kW, zoals een föhn die dag en nacht aanstaat</li><li>Relatief makkelijk te reguleren via vaste laadpalen</li></ul>
+          </div>
+          <div class="ledger-col slate">
+            <h4>Elektrische fiets</h4>
+            <ul><li>Vaak in gemeenschappelijke stalling</li><li>Klein vermogen per stuk: zo'n 0,2–0,5 kW, als een gewoon stopcontact</li><li>Risico zit niet in stroomverbruik, maar in accu's en losse kabels</li></ul>
+          </div>
+          <div class="ledger-col slate">
+            <h4>Scootmobiel</h4>
+            <ul><li>Vaak in berging of bij entree</li><li>Vermogen vergelijkbaar met een e-bike</li><li>Vaak dicht bij vluchtroutes gestald</li></ul>
+          </div>
+        </div>
+        <p>Dat verschil in vermogen is precies waarom het vaak de auto's zijn — en niet het grotere aantal fietsen of scootmobielen — die de hoofdaansluiting van het gebouw als eerste onder druk zetten.</p>
+        <p>Het grootste, vaak onderschatte risico zit niet bij de auto's, maar bij e-bikes en scootmobielen: hun accu's worden dikwijls in een berging of fietsenstalling opgeladen met een simpel stopcontact en een eigen lader, zonder overleg met het bestuur. Beschadigde accu's of goedkope, niet-gecertificeerde laders zijn een bekende oorzaak van felle, snel uitbreidende branden.</p>
+        <div class="callout warn">Een brand door een opladende e-bike of scootmobiel in een gemeenschappelijke berging kan zich razendsnel uitbreiden — juist in ruimtes waar vluchtroutes doorheen lopen. Dit is niet alleen een verzekeringskwestie, maar in de eerste plaats een veiligheidskwestie.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Waar zit vaak het grootste, onderschatte brandrisico bij het opladen rond het gebouw?</div>
+        <div class="opts" data-quiz="2">
+          <button class="opt" data-correct="false" data-explain="Auto's laden meestal via vaste, beter gereguleerde laadpalen; het risico zit eerder bij ongecontroleerd laden van kleinere accu's.">Bij elektrische auto's op de parkeerplaats</button>
+          <button class="opt" data-correct="true">Bij e-bikes en scootmobielen die ongecontroleerd in bergingen worden opgeladen</button>
+          <button class="opt" data-correct="false" data-explain="Beschadigde accu's en niet-gecertificeerde laders zijn een bekende oorzaak van snel uitbreidende branden.">Er is geen verhoogd brandrisico bij opladen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2400 -->
+  <section class="account" id="acct-2" data-acct>
+    <div class="account-head" onclick="toggle(2)">
+      <span class="acct-num">2400</span>
+      <div class="acct-title"><h2>De hoofdaansluiting</h2><div class="kicker">De verborgen bottleneck</div></div>
+      <span class="check" id="check-2">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Elk gebouw heeft een hoofdaansluiting met een vast maximumvermogen. Die is ooit gedimensioneerd op het gewone verbruik van het gebouw — niet op tien laadpalen die 's avonds tegelijk vollast trekken.</p>
+        <p>Voordat het bestuur individuele verzoeken toezegt, is het verstandig te laten beoordelen — bijvoorbeeld door een elektrotechnisch adviseur — hoeveel laadvermogen de bestaande aansluiting nog kan dragen, en wat het kost om te verzwaren als dat nodig blijkt.</p>
+        <div class="callout">Een verzwaring van de hoofdaansluiting is een aanzienlijke investering die in het MJOP thuishoort, niet iets dat je terloops meeneemt in de afhandeling van één individueel verzoek.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Waarom is het verstandig om de hoofdaansluiting te laten beoordelen vóórdat je laadpunten toestaat?</div>
+        <div class="opts" data-quiz="3">
+          <button class="opt" data-correct="true">Omdat de aansluiting een maximumvermogen heeft dat niet is ontworpen op veel gelijktijdig laden</button>
+          <button class="opt" data-correct="false" data-explain="Er is geen wettelijke verplichting per verzoek; het is een praktische voorzorgsmaatregel om overbelasting te voorkomen.">Omdat dat wettelijk verplicht is voor elk individueel verzoek</button>
+          <button class="opt" data-correct="false" data-explain="Dat hangt af van het gebouw; soms is er wel voldoende ruimte, soms niet — vandaar de beoordeling.">Omdat de hoofdaansluiting nooit genoeg capaciteit heeft</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2600 -->
+  <section class="account" id="acct-3" data-acct>
+    <div class="account-head" onclick="toggle(3)">
+      <span class="acct-num">2600</span>
+      <div class="acct-title"><h2>Wie betaalt: laadstroom afrekenen</h2><div class="kicker">Voorkom dat de VvE meebetaalt aan individueel gebruik</div></div>
+      <span class="check" id="check-3">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Stroom voor laadpalen komt vaak van de gemeenschappelijke aansluiting, terwijl het gebruik overwegend individueel is. Zonder goede afspraken betaalt de hele VvE mee aan het opladen van een paar leden.</p>
+        <div class="ledger-split">
+          <div class="ledger-col credit">
+            <h4>Werkt eerlijk</h4>
+            <ul><li>Submeters per laadpunt, apart doorbelast</li><li>Laadpassen die verbruik per gebruiker registreren</li><li>Vast maandbedrag per aangesloten laadpunt</li></ul>
+          </div>
+          <div class="ledger-col debet">
+            <h4>Werkt niet eerlijk</h4>
+            <ul><li>Alles stilzwijgend via de algemene stroomrekening</li><li>Geen registratie van wie hoeveel laadt</li><li>Achteraf pas nadenken over verdeling</li></ul>
+          </div>
+        </div>
+        <div class="callout">Leg de verdeelsleutel vooraf vast, vóórdat het eerste laadpunt wordt aangelegd — achteraf een systeem optuigen levert vrijwel altijd discussie op.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Wat voorkomt dat de hele VvE meebetaalt aan het individuele stroomverbruik van een laadpaal?</div>
+        <div class="opts" data-quiz="4">
+          <button class="opt" data-correct="true">Submetering of laadpassen die het verbruik per gebruiker registreren en doorbelasten</button>
+          <button class="opt" data-correct="false" data-explain="Individueel laadgebruik kan wel degelijk apart worden gemeten en doorbelast, zodat het niet ten koste gaat van de gezamenlijke kas.">Niets, gedeeld stroomverbruik hoort nu eenmaal bij een VvE</button>
+          <button class="opt" data-correct="false" data-explain="Dat laat juist iedereen meebetalen, ook leden die geen laadpunt gebruiken — niet eerlijk verdeeld.">Een vaste generieke verhoging van de VvE-bijdrage voor iedereen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2700 -->
+  <section class="account" id="acct-4" data-acct>
+    <div class="account-head" onclick="toggle(4)">
+      <span class="acct-num">2700</span>
+      <div class="acct-title"><h2>Brandveiligheid en de verzekeraar</h2><div class="kicker">Wat dit betekent voor de polis</div></div>
+      <span class="check" id="check-4">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Verzekeraars stellen steeds vaker specifieke eisen aan het laden van accu's in gemeenschappelijke ruimtes, of sluiten schade daardoor juist uit als niet aan bepaalde voorwaarden is voldaan.</p>
+        <p>Vraag expliciet na bij de verzekeraar: onder welke voorwaarden mag er in de fietsenstalling of berging worden opgeladen, en welke eisen gelden er aan blusmiddelen en vluchtroutes. Zorg dat opladen nooit ten koste gaat van vrije vluchtroutes — provisorische verlengsnoeren door een gang zijn zowel een brand- als een struikelrisico.</p>
+        <div class="callout warn">Een schadeclaim na een accubrand kan (deels) worden afgewezen als blijkt dat is opgeladen in strijd met de polisvoorwaarden of de brandveiligheidseisen. Dit is een reden te meer om heldere regels op te stellen én na te leven.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Wat kan er gebeuren als een accubrand ontstaat terwijl er is opgeladen in strijd met de polisvoorwaarden?</div>
+        <div class="opts" data-quiz="5">
+          <button class="opt" data-correct="true">De verzekeraar kan de schade-uitkering (deels) weigeren</button>
+          <button class="opt" data-correct="false" data-explain="Verzekeraars kunnen specifieke eisen stellen aan het laden van accu's; niet naleven daarvan kan de dekking juist raken.">Dat heeft geen invloed op de verzekering</button>
+          <button class="opt" data-correct="false" data-explain="Het tegenovergestelde is waar: het niet naleven van polisvoorwaarden kan de dekking juist beperken.">De VvE is dan automatisch extra goed verzekerd</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2900 -->
+  <section class="account" id="acct-5" data-acct>
+    <div class="account-head" onclick="toggle(5)">
+      <span class="acct-num">2900</span>
+      <div class="acct-title"><h2>Van ad-hoc naar een laadplan</h2><div class="kicker">Een stappenplan voor het bestuur</div></div>
+      <span class="check" id="check-5">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <ul class="steps">
+          <li><strong>Inventariseer de vraag</strong> — hoeveel leden hebben nu al een laadbehoefte, en hoeveel realistisch over vijf jaar?</li>
+          <li><strong>Laat de capaciteit beoordelen</strong> — een elektrotechnisch adviseur brengt in kaart wat de hoofdaansluiting aankan en wat verzwaren kost.</li>
+          <li><strong>Kies waar mogelijk voor gedeelde infrastructuur</strong> — een systeem met lastmanagement, dat het beschikbare vermogen automatisch verdeelt, is vaak toekomstbestendiger en goedkoper dan steeds losse individuele aanvragen honoreren.</li>
+          <li><strong>Stel spelregels op</strong> — waar mag wel/niet worden opgeladen, welke apparatuur is toegestaan, wie is verantwoordelijk voor onderhoud van gedeelde infrastructuur.</li>
+          <li><strong>Regel de afrekening en de verzekering</strong> — leg de verdeelsleutel vast en stem af met de verzekeraar.</li>
+          <li><strong>Verwerk het in het MJOP en de begroting</strong> — laadinfrastructuur is een investering zoals andere verduurzamingsmaatregelen, en hoort niet toevallig te landen in de afhandeling van één individueel verzoek.</li>
+        </ul>
+        <div class="callout">Een individueel verzoek is vaak het moment waarop dit onderwerp voor het eerst concreet wordt — maar het bestuur doet er goed aan om daarna niet bij dat ene verzoek te blijven steken, en een plan te maken voor de VvE als geheel.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Wat is doorgaans een toekomstbestendiger aanpak dan het één voor één honoreren van individuele laadverzoeken?</div>
+        <div class="opts" data-quiz="6">
+          <button class="opt" data-correct="true">Gedeelde laadinfrastructuur met lastmanagement die het beschikbare vermogen automatisch verdeelt</button>
+          <button class="opt" data-correct="false" data-explain="Dat leidt vaak tot een lappendeken aan losse oplossingen die de hoofdaansluiting sneller laten vastlopen.">Elk verzoek apart en zo snel mogelijk individueel goedkeuren</button>
+          <button class="opt" data-correct="false" data-explain="Gezien het wettelijk kader en de groeiende vraag is dit meestal geen houdbare aanpak op de lange termijn.">Laadpunten helemaal niet toestaan om problemen te voorkomen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9600 -->
+  <section class="account" id="acct-6" data-acct>
+    <div class="account-head" onclick="toggle(6)">
+      <span class="acct-num">9600</span>
+      <div class="acct-title"><h2>Checklist: laden bij het gebouw</h2><div class="kicker">Voor auto's, e-bikes en scootmobielen</div></div>
+      <span class="check" id="check-6">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <div class="final">
+          <ul>
+            <li><span class="dot"></span>Is er zicht op de huidige én verwachte laadbehoefte onder de leden?</li>
+            <li><span class="dot"></span>Is de capaciteit van de hoofdaansluiting beoordeeld door een deskundige?</li>
+            <li><span class="dot"></span>Is gekozen voor gedeelde infrastructuur met lastmanagement waar dat kan?</li>
+            <li><span class="dot"></span>Is er een verdeelsleutel voor het doorbelasten van stroomverbruik?</li>
+            <li><span class="dot"></span>Zijn er heldere regels voor waar wel/niet mag worden opgeladen, met oog voor vluchtroutes?</li>
+            <li><span class="dot"></span>Is bij de verzekeraar nagevraagd welke eisen gelden voor het laden van accu's?</li>
+            <li><span class="dot"></span>Staat laadinfrastructuur als aparte post in het MJOP?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="done-banner" id="doneBanner">
+    <svg class="done-illustration" width="56" height="56" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="30" fill="#C98A2C"/>
+      <circle cx="24" cy="26" r="10" fill="#fff" opacity="0.95"/>
+      <circle cx="40" cy="26" r="10" fill="#fff" opacity="0.95"/>
+      <rect x="19" y="19" width="26" height="26" fill="#fff" opacity="0.95" transform="rotate(45 32 32)"/>
+    </svg>
+    <div class="done-compliment">Goed gedaan!</div>
+    <p class="done-text">Je weet nu waar je op moet letten bij laadpalen, e-bikes en scootmobielen bij het gebouw — van de hoofdaansluiting tot brandveiligheid en een eerlijke afrekening.</p>
+    <div class="done-score"><span class="num" id="doneScore">0/6</span> controlevragen goed beantwoord. Je hebt deze module over laden bij het gebouw doorlopen.</div>
+    <div class="done-actions"><a class="done-btn" href="../index.html">&larr; Terug naar overzicht</a></div>
+  </div>
+
+</main>
+
+<footer>LAADPALEN, E-BIKES EN SCOOTMOBIELEN — INTERNE E-LEARNING, VERVOLG OP DE VOORGAANDE MODULES</footer>
+
+<script>
+  const total = 7;
+  const opened = new Set();
+  const answered = {};
+
+  function toggle(i){
+    const el = document.getElementById('acct-'+i);
+    el.classList.toggle('open');
+    if(el.classList.contains('open')){
+      opened.add(i);
+      document.getElementById('check-'+i).classList.add('done');
+      updateProgress();
+    }
+  }
+
+  function updateProgress(){
+    const n = opened.size;
+    document.getElementById('progressFill').style.width = (n/total*100)+'%';
+    document.getElementById('progressCount').textContent = n+' / '+total;
+    if(n === total){
+      const answeredCount = Object.values(answered).filter(v=>v.correct).length;
+      document.getElementById('doneScore').textContent = answeredCount + '/6';
+      document.getElementById('doneBanner').classList.add('show');
+      try{ var _uidKey = (window.__vveUid || 'anon'); localStorage.setItem('vveModuleDone:'+_uidKey+':laadpalen','1'); }catch(e){}
+      if (window.__markModuleCompleted) { window.__markModuleCompleted(); }
+    }
+  }
+
+  document.querySelectorAll('[data-quiz]').forEach(group=>{
+    const qid = group.getAttribute('data-quiz');
+    const feedback = group.parentElement.querySelector('.feedback');
+    group.querySelectorAll('.opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const correct = btn.getAttribute('data-correct') === 'true';
+        btn.classList.add(correct ? 'correct' : 'wrong');
+        if(correct){ answered[qid] = {correct:true}; }
+        if(correct){
+          feedback.textContent = 'Klopt \u2014 precies dit is het idee.';
+        } else {
+          const explain = btn.getAttribute('data-explain') || '';
+          feedback.textContent = 'Niet helemaal: ' + explain + ' Lees de paragraaf hierboven gerust nog eens door.';
+        }
+        feedback.classList.add('show');
+        updateProgress();
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-// fix 45
+// fix 48
 // VUL HIERONDER JE EIGEN FIREBASE-CONFIGURATIE IN
 // (Firebase Console > Projectinstellingen > Jouw apps > Web app > SDK setup and configuration)
 export const firebaseConfig = {
@@ -43,4 +43,5 @@ export const ALL_MODULES = [
   { slug: "bijdragen-incasso", title: "Module 10 — Bijdragen, incasso en achterstanden" },
   { slug: "vve-en-omgeving", title: "Module 11 — VvE en omgeving" },
   { slug: "conflict-burenruzies", title: "Module 12 — Conflict, burenruzies en overlast" },
+  { slug: "laadpalen", title: "Module 13 — Laadpalen, e-bikes en scootmobielen" },
 ];

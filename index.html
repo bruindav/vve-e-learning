@@ -1,4 +1,4 @@
-<!-- fix 46 -->
+<!-- fix 48 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -716,6 +716,35 @@
       </div>
     </div>
 
+    <div class="card locked" data-slug="laadpalen">
+      <svg class="card-done-badge" data-done-slug="laadpalen" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30" fill="#3d6b52" stroke="#fff" stroke-width="3"/>
+        <g fill="#fff">
+          <rect x="16" y="30" width="10" height="20" rx="3"/>
+          <path d="M28 30 V47 Q28 50 31 50 H42 Q46 50 47 46 L50 33 Q51 29 47 29 H37 L39 19 Q39 15 35 15 Q32 15 32 19 L28 30 Z"/>
+        </g>
+      </svg>
+      <div class="toprow">
+        <div class="left">
+          <span class="num">MODULE 13</span>
+          <div>
+            <h3>Laadpalen, e-bikes en scootmobielen</h3>
+            <div class="kicker">Groeiende vraag, en een wettelijk kader</div>
+          </div>
+        </div>
+        <span class="tag">Toekomstgericht</span>
+      </div>
+      <ul>
+        <li>Waarom dit onderwerp bijna elk bestuur vroeg of laat raakt, en wat de wet regelt</li>
+        <li>De hoofdaansluiting, brandveiligheid, en een eerlijke afrekening van laadstroom</li>
+        <li>Van losse verzoeken naar een doordacht laadplan voor de hele VvE</li>
+      </ul>
+      <div class="bottomrow">
+        <span class="time">⏳ ca. 20 minuten · 7 onderdelen · €15</span>
+        <span class="locked-badge">&#128274; Op aanvraag beschikbaar</span>
+      </div>
+    </div>
+
 
   </div>
 
@@ -744,8 +773,8 @@
 </footer>
 
 <script type="module">
-  import { watchAuth, getVveDocForCurrentUser, getGroupForCurrentUser, sendModuleRequestEmail, getTikkieConfig, isTikkieValid, logout } from './assets/vve-auth.js?v47';
-  import { PAYMENT_IBAN, PAYMENT_TNV, PAYMENT_PRICE } from './assets/firebase-config.js?v47';
+  import { watchAuth, getVveDocForCurrentUser, getGroupForCurrentUser, sendModuleRequestEmail, getTikkieConfig, isTikkieValid, logout } from './assets/vve-auth.js?v48';
+  import { PAYMENT_IBAN, PAYMENT_TNV, PAYMENT_PRICE } from './assets/firebase-config.js?v48';
 
   function updateLoginStatus(user, vve){
     var link = document.getElementById('loginStatusLink');

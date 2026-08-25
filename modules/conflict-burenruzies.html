@@ -1,4 +1,4 @@
-<!-- fix 46 -->
+<!-- fix 49 -->
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -235,7 +235,7 @@
 <div class="progressbar">
   <span class="label">VOORTGANG</span>
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-  <span class="progress-count" id="progressCount">0 / 7</span>
+  <span class="progress-count" id="progressCount">0 / 9</span>
 </div>
 
 <header class="cover">
@@ -247,12 +247,39 @@
 
 <main>
 
-  <!-- 1000 -->
+  <!-- 500 -->
   <section class="account" id="acct-0" data-acct>
     <div class="account-head" onclick="toggle(0)">
+      <span class="acct-num">500</span>
+      <div class="acct-title"><h2>Eerst het gesprek zelf</h2><div class="kicker">De goedkoopste en snelste stap staat niet in het reglement</div></div>
+      <span class="check" id="check-0">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Voordat er sprake is van een "VvE-zaak", een formeel traject, of externe hulp: de meeste conflicten tussen bewoners beginnen klein, en lossen zich ook het snelst op als de partijen gewoon met elkaar in gesprek gaan. Niet iedereen doet dat vanzelf — irritatie leidt makkelijker tot een boze app of een klacht bij het bestuur dan tot een gesprek aan de deur.</p>
+        <p>Als bestuur kun je dit stimuleren, zonder zelf de inhoud van het conflict over te nemen: vraag bij een eerste klacht altijd of de bewoner het zelf al rechtstreeks heeft besproken met de ander. Zo niet, moedig dat eerst aan. Belangrijk is niet alleen dát er gepraat wordt, maar ook <em>hoe</em>: laat de ander uitpraten, probeer te begrijpen wat er speelt voordat je reageert, en ga niet het gesprek in met een kant-en-klaar oordeel.</p>
+        <div class="callout">Een gesprek waarin niemand echt luistert, lost meestal niets op — en kan het conflict zelfs verharden. "Praat met elkaar" is alleen effectief als er ook daadwerkelijk geluisterd wordt, niet alleen om beurten gesproken.</div>
+        <p>Lukt het de partijen niet om er samen uit te komen, dan is dat het moment waarop de vraag relevant wordt of dit een VvE-zaak is — het onderwerp van het volgende onderdeel.</p>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Wat is meestal de meest effectieve eerste stap bij een conflict tussen twee bewoners?</div>
+        <div class="opts" data-quiz="1">
+          <button class="opt" data-correct="true">Aanmoedigen dat de partijen rechtstreeks met elkaar praten én naar elkaar luisteren</button>
+          <button class="opt" data-correct="false" data-explain="Formele stappen zijn er wel, maar zijn zwaarder en pas aan de orde als een rechtstreeks gesprek niet werkt of geen optie is.">Meteen een formele, schriftelijke waarschuwing sturen</button>
+          <button class="opt" data-correct="false" data-explain="Dat is een optie verderop in het traject, niet de eerste, laagdrempelige stap.">Meteen een mediator inschakelen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1000 -->
+  <section class="account" id="acct-1" data-acct>
+    <div class="account-head" onclick="toggle(1)">
       <span class="acct-num">1000</span>
       <div class="acct-title"><h2>De rol van het bestuur bij een conflict</h2><div class="kicker">Geen rechter, geen mediator van nature</div></div>
-      <span class="check" id="check-0">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-1">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -262,7 +289,7 @@
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Wat is de kern van de rol van het bestuur bij een conflict tussen bewoners?</div>
-        <div class="opts" data-quiz="1">
+        <div class="opts" data-quiz="2">
           <button class="opt" data-correct="false" data-explain="Het bestuur is geen rechter en heeft niet de taak om vast te stellen wie er 'gelijk' heeft in een persoonlijk geschil." >Vaststellen wie er gelijk heeft, en dat uitspreken namens de VvE</button>
           <button class="opt" data-correct="true">Toezien op naleving van het reglement en de gedragsnormen daarin, namens het gezamenlijke belang</button>
           <button class="opt" data-correct="false" data-explain="Het bestuur is geen professionele mediator; bij een puur persoonlijk conflict is externe hulp vaak passender dan dat het bestuur zelf gaat bemiddelen.">Als mediator elk conflict tussen bewoners persoonlijk oplossen</button>
@@ -273,11 +300,11 @@
   </section>
 
   <!-- 2000 -->
-  <section class="account" id="acct-1" data-acct>
-    <div class="account-head" onclick="toggle(1)">
+  <section class="account" id="acct-2" data-acct>
+    <div class="account-head" onclick="toggle(2)">
       <span class="acct-num">2000</span>
       <div class="acct-title"><h2>VvE-zaak of privékwestie?</h2><div class="kicker">Het onderscheid dat alles bepaalt</div></div>
-      <span class="check" id="check-1">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-2">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -305,7 +332,7 @@
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Wanneer heeft het bestuur een rol bij een conflict tussen twee bewoners?</div>
-        <div class="opts" data-quiz="2">
+        <div class="opts" data-quiz="3">
           <button class="opt" data-correct="false" data-explain="Het bestuur heeft niet bij elk conflict een rol; alleen als het reglement of het gezamenlijke belang wordt geraakt." >Altijd, zodra een van beide partijen daarom vraagt</button>
           <button class="opt" data-correct="true">Als het conflict de naleving van het reglement of het gezamenlijke belang raakt</button>
           <button class="opt" data-correct="false" data-explain="Alleen wanneer het over geld gaat is te beperkt; ook overlast en reglementsovertredingen zonder financieel aspect raken het bestuur." >Alleen als er een financieel geschil tussen de bewoners speelt</button>
@@ -316,11 +343,11 @@
   </section>
 
   <!-- 3000 -->
-  <section class="account" id="acct-2" data-acct>
-    <div class="account-head" onclick="toggle(2)">
+  <section class="account" id="acct-3" data-acct>
+    <div class="account-head" onclick="toggle(3)">
       <span class="acct-num">3000</span>
       <div class="acct-title"><h2>Wat het bestuur vooral niet moet doen</h2><div class="kicker">Veelgemaakte valkuilen</div></div>
-      <span class="check" id="check-2">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-3">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -336,7 +363,7 @@
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Waarom is het riskant als een bestuur te snel partij kiest in een conflict?</div>
-        <div class="opts" data-quiz="3">
+        <div class="opts" data-quiz="4">
           <button class="opt" data-correct="true">Het ondermijnt de geloofwaardigheid en neutraliteit die het bestuur nodig heeft om later eventueel formeel op te treden</button>
           <button class="opt" data-correct="false" data-explain="Snel partij kiezen levert juist risico's op, niet tijdwinst die de zorgvuldigheid rechtvaardigt." >Het bespaart tijd en is daarom altijd verstandig</button>
           <button class="opt" data-correct="false" data-explain="Het reglement verplicht het bestuur niet om snel een standpunt in te nemen; zorgvuldigheid weegt zwaarder dan snelheid." >Het reglement verplicht het bestuur om snel een standpunt in te nemen</button>
@@ -347,11 +374,11 @@
   </section>
 
   <!-- 4000 -->
-  <section class="account" id="acct-3" data-acct>
-    <div class="account-head" onclick="toggle(3)">
+  <section class="account" id="acct-4" data-acct>
+    <div class="account-head" onclick="toggle(4)">
       <span class="acct-num">4000</span>
       <div class="acct-title"><h2>Overlast door één bewoner: het stappenplan</h2><div class="kicker">Van signaleren tot ontzegging van gebruik</div></div>
-      <span class="check" id="check-3">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-4">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -368,7 +395,7 @@
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Wat is meestal de eerste formele stap ná een informeel gesprek, als de overlast aanhoudt?</div>
-        <div class="opts" data-quiz="4">
+        <div class="opts" data-quiz="5">
           <button class="opt" data-correct="false" data-explain="Ontzegging van gebruik is het zwaarste en laatste middel, niet de eerste formele stap na een informeel gesprek." >Direct het gebruik van gemeenschappelijke ruimtes ontzeggen</button>
           <button class="opt" data-correct="true">Een schriftelijke waarschuwing, met verwijzing naar het reglement</button>
           <button class="opt" data-correct="false" data-explain="Een gerechtelijke procedure past pas bij het uiterste einde van het traject, niet direct na een eerste informeel gesprek."> Meteen een gerechtelijke procedure starten</button>
@@ -379,11 +406,11 @@
   </section>
 
   <!-- 5000 -->
-  <section class="account" id="acct-4" data-acct>
-    <div class="account-head" onclick="toggle(4)">
+  <section class="account" id="acct-5" data-acct>
+    <div class="account-head" onclick="toggle(5)">
       <span class="acct-num">5000</span>
       <div class="acct-title"><h2>Hoor en wederhoor</h2><div class="kicker">Waarom zorgvuldigheid hier niet optioneel is</div></div>
-      <span class="check" id="check-4">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-5">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -393,7 +420,7 @@
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Waarom is hoor en wederhoor belangrijk voordat het bestuur formeel optreedt?</div>
-        <div class="opts" data-quiz="5">
+        <div class="opts" data-quiz="6">
           <button class="opt" data-correct="false" data-explain="Hoor en wederhoor is geen formaliteit die je kunt overslaan als het bestuur al overtuigd is; het is een zorgvuldigheidseis." >Het is alleen een formaliteit als het bestuur nog twijfelt</button>
           <button class="opt" data-correct="true">Het voorkomt dat op basis van eenzijdige klachten een onterecht besluit wordt genomen</button>
           <button class="opt" data-correct="false" data-explain="Hoor en wederhoor gaat over zorgvuldigheid van het besluitvormingsproces, niet over het besparen van tijd." >Het bespaart het bestuur tijd bij de besluitvorming</button>
@@ -404,11 +431,11 @@
   </section>
 
   <!-- 6000 -->
-  <section class="account" id="acct-5" data-acct>
-    <div class="account-head" onclick="toggle(5)">
+  <section class="account" id="acct-6" data-acct>
+    <div class="account-head" onclick="toggle(6)">
       <span class="acct-num">6000</span>
       <div class="acct-title"><h2>Wanneer schakel je externe hulp in</h2><div class="kicker">Mediator, wijkagent, of de rechter</div></div>
-      <span class="check" id="check-5">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-6">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
@@ -431,11 +458,13 @@
           </div>
         </div>
         <p>Het bestuur hoeft dit niet allemaal zelf op te lossen. Bij een vastgelopen, persoonlijk conflict is een onafhankelijke mediator vaak effectiever dan het bestuur zelf. Bij een acute of bedreigende situatie is de politie de juiste partij, niet het bestuur. En als een bewoner een formeel besluit van de vergadering simpelweg negeert, is de kantonrechter de volgende stap &mdash; met, zoals eerder besproken, de kosten daarvan in beginsel voor rekening van de nalatige bewoner.</p>
+        <p><strong>Buurtbemiddeling versus mediation</strong> &mdash; deze twee worden vaak door elkaar gebruikt, maar verschillen in praktijk. Buurtbemiddeling is een lokale, vaak gratis of goedkope voorziening (georganiseerd via de gemeente of het welzijnswerk), bemand door getrainde vrijwilligers, en vooral geschikt voor "gewone" burenirritaties zoals geluid, overlast of onenigheid over gemeenschappelijk gebruik. Mediation via een professionele, geregistreerde mediator is formeler, kost geld, en ligt meer voor de hand bij een complexer of hardnekkiger conflict, of wanneer er ook juridische belangen meespelen. Voor een eerste poging is buurtbemiddeling vaak de laagdrempeligste optie; loopt dat vast, dan is professionele mediation de volgende stap.</p>
+        <p><strong>Juridisch advies inwinnen</strong> is iets anders dan het bestuur dat zelf aan een bewoner geeft (wat, zoals eerder besproken, een valkuil is). Het gaat hier om het bestuur &mdash; namens de VvE &mdash; zelf juridisch advies inwinnen bij een jurist of de rechtsbijstandverzekering van de VvE, bijvoorbeeld voordat een zwaar middel zoals ontzegging van gebruik wordt voorgelegd aan de vergadering. Ook een individuele bewoner kan uiteraard op eigen kosten juridisch advies inwinnen; dat is niet aan het bestuur om te beoordelen of tegen te houden.</p>
       </div>
       <div class="acct-body-inner quiz" style="padding-top:0;">
         <div class="q">Controlevraag</div>
         <div class="q-text">Bij welke situatie is de politie de aangewezen partij, in plaats van het bestuur zelf?</div>
-        <div class="opts" data-quiz="6">
+        <div class="opts" data-quiz="7">
           <button class="opt" data-correct="false" data-explain="Een vastgelopen persoonlijk conflict is typisch een taak voor een mediator, niet primair voor de politie." >Een langlopend, maar niet dreigend persoonlijk conflict</button>
           <button class="opt" data-correct="true">Een acute of bedreigende situatie</button>
           <button class="opt" data-correct="false" data-explain="Een schriftelijke waarschuwing is een normale, formele bestuursstap; daar is geen politie-inzet voor nodig."> Het versturen van een schriftelijke waarschuwing</button>
@@ -445,22 +474,50 @@
     </div>
   </section>
 
+  <!-- 6500 -->
+  <section class="account" id="acct-7" data-acct>
+    <div class="account-head" onclick="toggle(7)">
+      <span class="acct-num">6500</span>
+      <div class="acct-title"><h2>Een onafhankelijke dagvoorzitter</h2><div class="kicker">Als een vergadering zelf de bron van spanning dreigt te worden</div></div>
+      <span class="check" id="check-7">✓</span><span class="chevron">▸</span>
+    </div>
+    <div class="acct-body">
+      <div class="acct-body-inner">
+        <p>Soms is het niet één conflict tussen twee bewoners, maar een geladen sfeer binnen de hele VvE &mdash; bijvoorbeeld rond een gevoelig agendapunt op de ALV, of na een periode van escalatie. In zo'n geval kan het verstandig zijn om de vergadering te laten leiden door een <strong>onafhankelijke dagvoorzitter</strong>: iemand van buiten het bestuur (en bij voorkeur van buiten de VvE), die geen eigen belang heeft bij de uitkomst.</p>
+        <p>Een onafhankelijke dagvoorzitter bewaakt de orde, geeft iedereen evenveel spreektijd, en voorkomt dat de vergadering verzandt in een welles-nietes tussen dezelfde twee of drie stemmen. Dit is geen vervanging voor bemiddeling in een individueel conflict, maar een aanvullend instrument specifiek voor het moment dat de groep bij elkaar komt: het verlaagt de kans dat een toch al gespannen vergadering verder escaleert.</p>
+        <div class="callout">Een dagvoorzitter hoeft niet duur te zijn &mdash; soms is een ervaren bestuurslid van een andere VvE, een beheerder, of iemand uit een vergelijkbaar netwerk al voldoende, zolang diegene geen persoonlijk belang heeft bij de uitkomst en door de vergadering als neutraal wordt gezien.</div>
+      </div>
+      <div class="acct-body-inner quiz" style="padding-top:0;">
+        <div class="q">Controlevraag</div>
+        <div class="q-text">Wat is het belangrijkste doel van een onafhankelijke dagvoorzitter bij een gespannen vergadering?</div>
+        <div class="opts" data-quiz="8">
+          <button class="opt" data-correct="true">De orde bewaken en de vergadering neutraal leiden, zonder eigen belang bij de uitkomst</button>
+          <button class="opt" data-correct="false" data-explain="Een dagvoorzitter leidt de vergadering; hij of zij neemt niet de plaats in van bemiddeling in een individueel conflict tussen twee bewoners.">Het onderliggende conflict tussen twee bewoners inhoudelijk oplossen</button>
+          <button class="opt" data-correct="false" data-explain="Juist het tegenovergestelde: een dagvoorzitter is onafhankelijk en heeft zelf geen stem of belang in de uitkomst.">Namens het bestuur een bindende uitspraak doen</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 9000 -->
-  <section class="account" id="acct-6" data-acct>
-    <div class="account-head" onclick="toggle(6)">
+  <section class="account" id="acct-8" data-acct>
+    <div class="account-head" onclick="toggle(8)">
       <span class="acct-num">9000</span>
       <div class="acct-title"><h2>Checklist: conflict en overlast</h2><div class="kicker">Voordat je formeel in actie komt</div></div>
-      <span class="check" id="check-6">✓</span><span class="chevron">▸</span>
+      <span class="check" id="check-8">✓</span><span class="chevron">▸</span>
     </div>
     <div class="acct-body">
       <div class="acct-body-inner">
         <div class="final">
           <ul>
+            <li><span class="dot"></span>Hebben de partijen zelf al geprobeerd er samen uit te komen, mét luisteren naar elkaar?</li>
             <li><span class="dot"></span>Is vastgesteld of dit een VvE-zaak is (reglement/gezamenlijk belang) of een puur persoonlijke kwestie?</li>
             <li><span class="dot"></span>Zijn klachten en incidenten gedocumenteerd voordat er formeel wordt opgetreden?</li>
             <li><span class="dot"></span>Heeft de betrokken bewoner de kans gekregen om zijn of haar kant toe te lichten?</li>
             <li><span class="dot"></span>Is een eventuele boete of ontzegging genomen via een formeel, correct vergaderbesluit?</li>
-            <li><span class="dot"></span>Is overwogen of externe hulp (mediator, politie) passender is dan dat het bestuur het zelf oplost?</li>
+            <li><span class="dot"></span>Is overwogen of externe hulp passender is: buurtbemiddeling, mediation, juridisch advies, of politie?</li>
+            <li><span class="dot"></span>Is bij een gespannen vergadering een onafhankelijke dagvoorzitter overwogen?</li>
           </ul>
         </div>
       </div>
@@ -476,7 +533,7 @@
     </svg>
     <div class="done-compliment">Goed gedaan!</div>
     <p class="done-text">Je weet nu wat het bestuur wel en niet moet doen bij een conflict, en welke stappen passen bij overlast door één bewoner.</p>
-    <div class="done-score"><span class="num" id="doneScore">0/6</span> controlevragen goed beantwoord. Je hebt deze module over conflict en burenruzies doorlopen.</div>
+    <div class="done-score"><span class="num" id="doneScore">0/8</span> controlevragen goed beantwoord. Je hebt deze module over conflict en burenruzies doorlopen.</div>
     <div class="done-actions"><a class="done-btn" href="../index.html">&larr; Terug naar overzicht</a></div>
   </div>
 
@@ -485,7 +542,7 @@
 <footer>CONFLICT, BURENRUZIES EN OVERLAST — INTERNE E-LEARNING, VERVOLG OP DE VOORGAANDE MODULES</footer>
 
 <script>
-  const total = 7;
+  const total = 9;
   const opened = new Set();
   const answered = {};
 
@@ -505,7 +562,7 @@
     document.getElementById('progressCount').textContent = n+' / '+total;
     if(n === total){
       const answeredCount = Object.values(answered).filter(v=>v.correct).length;
-      document.getElementById('doneScore').textContent = answeredCount + '/6';
+      document.getElementById('doneScore').textContent = answeredCount + '/8';
       document.getElementById('doneBanner').classList.add('show');
       try{ var _uidKey = (window.__vveUid || 'anon'); localStorage.setItem('vveModuleDone:'+_uidKey+':conflict-burenruzies','1'); }catch(e){}
       if (window.__markModuleCompleted) { window.__markModuleCompleted(); }
